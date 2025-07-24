@@ -327,9 +327,10 @@ function openBookingModal({date, hour}) {
                         cell.style.cursor = '';
                     }
                 } else {
-                    cell.classList.remove('disabled-cell');
+                    cell.classList.add('disabled-cell');
                     cell.style.pointerEvents = '';
                     cell.style.cursor = '';
+                    cell.textContent = "";
                 }
             });
         } else if (data.error) {
