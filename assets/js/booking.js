@@ -254,6 +254,7 @@ function openBookingModal({date, hour}) {
       .then(function(data) {
           if (data.success === true) {
                 fetchBookings();
+                renderTodayBookingTable();
                 Swal.fire('Data tersimpan', 'Booking berhasil disimpan!', 'success');
           }
           if (!data.success) {
@@ -269,71 +270,81 @@ function openBookingModal({date, hour}) {
 
     // AJAX: Fetch bookings
     function fetchBookings() {
-      fetch('booking-api.php?action=load')
-      .then(res => res.json())
-      .then(data => {
+    fetch('booking-api.php?action=load')
+    .then(res => res.json())
+    .then(data => {
         const now = new Date();
         if (data.success && data.bookings) {
-          // Set warna untuk cell yang ada booking (selalu merah)
-          const bookedCells = new Set();
-          for (const key in data.bookings) {
-            const booking = data.bookings[key];
-            const cellKey = key.split('_').slice(0,2).join('_');
-            const cell = document.querySelector('.booking-cell[data-date="' + cellKey + '"]');
-            if (cell) {
-              cell.textContent = booking.unit;
-              cell.classList.add('booked');
-              cell.classList.remove('disabled-cell');
-              cell.style.background = '';
-              cell.style.color = '';
-              cell.style.fontWeight = '';
-              cell.style.border = '';
-              bookedCells.add(cellKey);
-            }
-          }
-          // Warnai cell kosong yang masih bisa diisi dengan hijau, dan yang sudah lewat tanpa booking jadi abu-abu
-          document.querySelectorAll('.booking-cell').forEach(cell => {
-            const cellKey = cell.getAttribute('data-date');
-            if (!cell.textContent) {
-                // Cek waktu cell
-                const [dateStr, hourStr] = cellKey.split('_');
-                const cellDate = new Date(dateStr + 'T' + hourStr.padStart(2,'0') + ':00:00');
-                // Ubah: booking masih bisa jika jam sama dengan jam sekarang
-                if (
-                    cellDate.getFullYear() < now.getFullYear() ||
-                    (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() < now.getMonth()) ||
-                    (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() === now.getMonth() && cellDate.getDate() < now.getDate()) ||
-                    (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() === now.getMonth() && cellDate.getDate() === now.getDate() && cellDate.getHours() < now.getHours())
-                ) {
-                    // Sudah lewat dan tidak ada booking: abu-abu
-                    cell.classList.add('disabled-cell');
-                    cell.style.background = '#e9ecef';
-                    cell.style.color = '#aaa';
-                    cell.style.fontWeight = '400';
-                    cell.style.border = '1px solid #dee2e6';
-                } else {
-                    // Belum lewat dan kosong: hijau
+            // Set warna untuk cell yang ada booking (selalu merah)
+            const bookedCells = new Set();
+            for (const key in data.bookings) {
+                const booking = data.bookings[key];
+                const cellKey = key.split('_').slice(0,2).join('_');
+                const cell = document.querySelector('.booking-cell[data-date="' + cellKey + '"]');
+                if (cell) {
+                    cell.textContent = booking.unit;
+                    cell.classList.add('booked');
                     cell.classList.remove('disabled-cell');
-                    cell.classList.remove('booked');
-                    // reset style
                     cell.style.background = '';
                     cell.style.color = '';
                     cell.style.fontWeight = '';
                     cell.style.border = '';
+                    bookedCells.add(cellKey);
                 }
-            } else {
-              cell.classList.remove('disabled-cell');
             }
-          });
+            // Warnai cell kosong yang sudah lewat dengan abu-abu dan disable klik
+            document.querySelectorAll('.booking-cell').forEach(cell => {
+                const cellKey = cell.getAttribute('data-date');
+                if (!cell.textContent) {
+                    // Cek waktu cell
+                    const [dateStr, hourStr] = cellKey.split('_');
+                    const cellDate = new Date(dateStr + 'T' + hourStr.padStart(2,'0') + ':00:00');
+                    // Perbolehkan booking jika jam sama dengan sekarang
+                    const now = new Date();
+                    if (
+                        cellDate.getFullYear() < now.getFullYear() ||
+                        (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() < now.getMonth()) ||
+                        (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() === now.getMonth() && cellDate.getDate() < now.getDate()) ||
+                        (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() === now.getMonth() && cellDate.getDate() === now.getDate() && cellDate.getHours() < now.getHours())
+                    ) {
+                        // Sudah lewat dan tidak ada booking: abu-abu & tidak bisa diklik
+                        cell.classList.add('disabled-cell');
+                        cell.style.background = '#e9ecef';
+                        cell.style.color = '#aaa';
+                        cell.style.fontWeight = '400';
+                        cell.style.border = '1px solid #dee2e6';
+                        cell.style.pointerEvents = 'none';
+                        cell.style.cursor = 'not-allowed';
+                    } else {
+                        // Belum lewat atau jam sama dengan sekarang: bisa booking
+                        cell.classList.remove('disabled-cell');
+                        cell.classList.remove('booked');
+                        cell.style.background = '';
+                        cell.style.color = '';
+                        cell.style.fontWeight = '';
+                        cell.style.border = '';
+                        cell.style.pointerEvents = '';
+                        cell.style.cursor = '';
+                    }
+                } else {
+                    cell.classList.remove('disabled-cell');
+                    cell.style.pointerEvents = '';
+                    cell.style.cursor = '';
+                }
+            });
         } else if (data.error) {
-          alert('Gagal memuat data booking: ' + data.error);
+            alert('Gagal memuat data booking: ' + data.error);
         }
-      })
-      .catch(() => {
+    })
+    .catch(() => {
         alert('Terjadi kesalahan saat memuat data booking!');
-      });
-    }
+    });
+}
+    
     $(document).ready(function() {
+        renderTodayBookingTable();
+    });
+
     function renderTodayBookingTable() {
         const today = new Date();
         const yyyy = today.getFullYear();
@@ -375,7 +386,7 @@ function openBookingModal({date, hour}) {
                         </th>
                     </tr>
                 </thead><tbody>`;
-                // 6 baris × 4 kolom
+                // 6 baris × 4 kolom (total 24 jam)
                 for (let row = 0; row < 6; row++) {
                     html += '<tr>';
                     for (let col = 0; col < 4; col++) {
@@ -383,10 +394,26 @@ function openBookingModal({date, hour}) {
                         if (idx < hours.length) {
                             const jam = hours[idx];
                             const jamNum = parseInt(jam.split(':')[0], 10);
-                            const key = `${dateStr}_${jamNum.toString().padStart(2, '0')}_1`;
+                            // Cari booking yang jam dan tanggalnya sama
+                            let unit = '';
+                            let booked = false;
+                            let keyFound = '';
+                            for (const key in bookings) {
+                                const b = bookings[key];
+                                if (
+                                    b.date === dateStr &&
+                                    parseInt(b.hour, 10) === jamNum
+                                ) {
+                                    unit = b.unit;
+                                    booked = true;
+                                    keyFound = key;
+                                    break;
+                                }
+                            }
                             let cls = 'available', label = 'Kosong';
-                            if (bookings[key]) {
+                            if (booked) {
                                 cls = 'booked';
+                                // label = unit;
                                 label = 'Booked';
                             } else if (jamNum < today.getHours()) {
                                 cls = 'past';
@@ -408,5 +435,3 @@ function openBookingModal({date, hour}) {
             }
         });
     }
-    renderTodayBookingTable();
-});
