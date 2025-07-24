@@ -295,26 +295,32 @@ function openBookingModal({date, hour}) {
           document.querySelectorAll('.booking-cell').forEach(cell => {
             const cellKey = cell.getAttribute('data-date');
             if (!cell.textContent) {
-              // Cek waktu cell
-              const [dateStr, hourStr] = cellKey.split('_');
-              const cellDate = new Date(dateStr + 'T' + hourStr.padStart(2,'0') + ':00:00');
-              if (cellDate < now) {
-                // Sudah lewat dan tidak ada booking: abu-abu
-                cell.classList.add('disabled-cell');
-                cell.style.background = '#e9ecef';
-                cell.style.color = '#aaa';
-                cell.style.fontWeight = '400';
-                cell.style.border = '1px solid #dee2e6';
-              } else {
-                // Belum lewat dan kosong: hijau
-                cell.classList.remove('disabled-cell');
-                cell.classList.remove('booked');
-                // reset style
-                cell.style.background = '';
-                cell.style.color = '';
-                cell.style.fontWeight = '';
-                cell.style.border = '';
-              }
+                // Cek waktu cell
+                const [dateStr, hourStr] = cellKey.split('_');
+                const cellDate = new Date(dateStr + 'T' + hourStr.padStart(2,'0') + ':00:00');
+                // Ubah: booking masih bisa jika jam sama dengan jam sekarang
+                if (
+                    cellDate.getFullYear() < now.getFullYear() ||
+                    (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() < now.getMonth()) ||
+                    (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() === now.getMonth() && cellDate.getDate() < now.getDate()) ||
+                    (cellDate.getFullYear() === now.getFullYear() && cellDate.getMonth() === now.getMonth() && cellDate.getDate() === now.getDate() && cellDate.getHours() < now.getHours())
+                ) {
+                    // Sudah lewat dan tidak ada booking: abu-abu
+                    cell.classList.add('disabled-cell');
+                    cell.style.background = '#e9ecef';
+                    cell.style.color = '#aaa';
+                    cell.style.fontWeight = '400';
+                    cell.style.border = '1px solid #dee2e6';
+                } else {
+                    // Belum lewat dan kosong: hijau
+                    cell.classList.remove('disabled-cell');
+                    cell.classList.remove('booked');
+                    // reset style
+                    cell.style.background = '';
+                    cell.style.color = '';
+                    cell.style.fontWeight = '';
+                    cell.style.border = '';
+                }
             } else {
               cell.classList.remove('disabled-cell');
             }
