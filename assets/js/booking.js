@@ -385,7 +385,7 @@ function openBookingModal({date, hour}) {
                 const headerTanggal = `${dayStr}<br> ${dateNumStr} ${monthStr} ${yearStr}
                     <span id="live-clock" font-weight:bold;"></span>
                 `;
-                setInterval(updateClock, 1000);
+                setInterval(updateClock, 500);
                 setTimeout(updateClock, 0);
 
                 let html = '<table class="table table-bordered booking-table" style="min-height:550px">';
