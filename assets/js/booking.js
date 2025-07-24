@@ -413,8 +413,8 @@ function openBookingModal({date, hour}) {
                             let cls = 'available', label = 'Kosong';
                             if (booked) {
                                 cls = 'booked';
-                                // label = unit;
-                                label = 'Booked';
+                                label = unit;
+                                // label = 'Booked';
                             } else if (jamNum < today.getHours()) {
                                 cls = 'past';
                                 label = 'Lewat';
