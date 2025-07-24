@@ -372,13 +372,27 @@ function openBookingModal({date, hour}) {
                 const dateNumStr = dateObj.getDate().toString().padStart(2, '0');
                 const monthStr = months[dateObj.getMonth()];
                 const yearStr = dateObj.getFullYear();
-                const headerTanggal = `${dayStr}, ${dateNumStr} ${monthStr} ${yearStr}`;
+                // Jam:menit dengan titik dua berkedip
+                let showColon = true;
+                function updateClock() {
+                    const now = new Date();
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    showColon = !showColon;
+                    const colon = showColon ? ':' : '<span style="opacity:0;">:</span>';
+                    document.getElementById('live-clock').innerHTML = `${hours}${colon}${minutes}`;
+                }
+                const headerTanggal = `${dayStr}<br> ${dateNumStr} ${monthStr} ${yearStr}
+                    <span id="live-clock" font-weight:bold;"></span>
+                `;
+                setInterval(updateClock, 1000);
+                setTimeout(updateClock, 0);
 
                 let html = '<table class="table table-bordered booking-table" style="min-height:550px">';
                 // Header merge dengan format lokal
                 html += `<thead>
                     <tr>
-                        <th colspan="4" style="text-align:center; font-size:1.1em;">
+                        <th colspan="6" style="text-align:center; font-size:1.1em;">
                             ${headerTanggal}
                         </th>
                     </tr>
