@@ -817,7 +817,7 @@ nav a::before {
   }
   nav ul {
     flex-direction: row;
-    left: 50%;
+    left: 46%;
   }
   nav ul li {
     display: inline;
