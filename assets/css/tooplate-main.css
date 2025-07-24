@@ -500,7 +500,7 @@ nav a::before {
 
 /* Slide 3 Style */
 .third-content {
-	top: 120%!important;
+	top: 100%!important;
 	transform: translateY(-120%);
 }
 .third-slide a {
