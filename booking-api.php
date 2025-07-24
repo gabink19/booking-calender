@@ -27,7 +27,7 @@ if ($action === 'save') {
         $stmt->fetch();
         $stmt->close();
         if ($count >= 2 || ($count >= 1 && $hourEnd !== '')) {
-            echo json_encode(['success' => false, 'error' => 'Unit sudah memiliki 2 booking dalam minggu yang sama']);
+            echo json_encode(['success' => false, 'error' => 'Total booking lebih dari 2 dalam minggu yang sama']);
             exit;
         }
     }
