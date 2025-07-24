@@ -18,9 +18,13 @@
 .booking-table thead th {
   position: sticky;
   top: 0;
-  z-index: 10;
-  background: linear-gradient(90deg, #007bff 60%, #339dff 100%) !important;
-  color: #fff !important;
+  background: #fff;
+  z-index: 2;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  height: 28px !important;
+  line-height: 1.1 !important;
+  vertical-align: middle !important;
 }
 .booking-table th.sticky-col {
   left: 0;
@@ -161,4 +165,17 @@
 }
 .swal2-booking-modal .form-control {
   width: 100%;
+}
+.sticky-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.sticky-table thead th {
+    position: sticky;
+    top: 0;
+    background: white; /* atau warna lain sesuai kebutuhan */
+    z-index: 2; /* agar berada di atas konten body */
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
 }

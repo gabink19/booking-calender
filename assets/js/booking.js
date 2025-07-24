@@ -2,7 +2,7 @@
     function getNext7Days() {
         const days = [];
         const today = new Date();
-        const hari = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        const hari = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         for (let i = 0; i < 7; i++) {
             const d = new Date(today);
             d.setDate(today.getDate() + i);
@@ -20,17 +20,19 @@
         const days = getNext7Days();
         let html = `
         <div class="booking-calendar-responsive">
-        <table class="table table-bordered text-center align-middle booking-table" style="width:100%; margin-bottom:0; table-layout:auto;">`;
-        // Header
-        html += '</tr></thead><tbody>';
-        // Second header row for labels
-        html += '<tr>';
-        html += '<th class="sticky-col"></th>';
-        days.forEach((day) => {
-            html += `<th>${day.label}</th>`;
-        });
-        html += '</tr>';
-        // Rows for each hour
+        <table class="table table-bordered text-center align-middle booking-table sticky-table" style="width:100%; margin-bottom:0; table-layout:fixed;">
+            <colgroup>
+                <col style="width: 60px;"> <!-- Kolom jam -->
+                ${days.map(() => '<col style="width: calc((100% - 60px)/7);">').join('')}
+            </colgroup>
+            <thead>
+                <tr>
+                    <th></th>
+                    ${days.map(day => `<th>${day.label}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+        `;
         const now = new Date();
         for (let hour = 0; hour < 24; hour++) {
             const hourLabel = hour.toString().padStart(2, '0') + ':00';
@@ -43,7 +45,6 @@
                 if (cellDate < now) {
                     cellClass += ' disabled-cell';
                 }
-                // Untuk tabel booking-calendar (bukan tabel jadwal hari ini)
                 html += `<td class="${cellClass}" data-date="${cellId}"></td>`;
             });
             html += '</tr>';
@@ -115,6 +116,7 @@
 
     // Init calendar on About Us slide show
     document.addEventListener('DOMContentLoaded', function() {
+        renderTodayBookingTable();
         renderBookingCalendar();
         document.getElementById('booking-calendar').addEventListener('click', handleBookingCellClick);
         addBookingCellHover();
@@ -130,46 +132,46 @@ function openBookingModal({date, hour}) {
             <input type="hidden" id="modal-hour" value="${hour}">
             <input type="hidden" id="modal-hour-end">
             <div class="mb-2 row align-items-center">
-              <label class="col-4 col-form-label" style="text-align:right;">Durasi :</label>
+              <label class="col-4 col-form-label" style="text-align:right;">Duration :</label>
               <div class="col-8 d-flex align-items-center gap-2">
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" name="durationRadio" id="duration1" value="1" checked>
-                  <label class="form-check-label" for="duration1">1 Jam</label>
+                  <label class="form-check-label" for="duration1">1 Hour</label>
                 </div>
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="radio" name="durationRadio" id="duration2" value="2">
-                  <label class="form-check-label" for="duration2" id="labelduration2">2 Jam</label>
+                  <label class="form-check-label" for="duration2" id="labelduration2">2 Hours</label>
                 </div>
               </div>
             </div>
             <div class="mb-2 row align-items-center">
-              <label class="col-4 col-form-label" style="text-align:right;">Tanggal :</label>
+              <label class="col-4 col-form-label" style="text-align:right;">Date :</label>
               <div class="col-8">
                 <input type="text" class="form-control" id="modal-date-display" value="${date}" disabled>
               </div>
             </div>
             <div class="mb-2 row align-items-center">
-              <label class="col-4 col-form-label" style="text-align:right;">Jam :</label>
+              <label class="col-4 col-form-label" style="text-align:right;">Hour :</label>
               <div class="col-8 d-flex align-items-center gap-1">
                 <input type="text" class="form-control" id="modal-hour-display" style="width:70px;" value="${hour.padStart(2,'0')}:00" disabled>
-                <span id="sampai-label" style="margin:0 4px; display:none;"> dan </span>
+                <span id="sampai-label" style="margin:0 4px; display:none;"> and </span>
                 <input type="text" class="form-control" id="modal-hour-end-display" style="width:70px; display:none;" disabled>
               </div>
             </div>
             <div class="mb-2 row align-items-center">
-              <label for="modal-name" class="col-4 col-form-label" style="text-align:right;">Nama :</label>
+              <label for="modal-name" class="col-4 col-form-label" style="text-align:right;">Name :</label>
               <div class="col-8">
                 <input type="text" class="form-control" id="modal-name" required>
               </div>
             </div>
             <div class="mb-2 row align-items-center">
-              <label for="modal-whatsapp" class="col-4 col-form-label" style="text-align:right;">No. Whatsapp :</label>
+              <label for="modal-whatsapp" class="col-4 col-form-label" style="text-align:right;">Whatsapp Number :</label>
               <div class="col-8">
                 <input type="text" class="form-control" id="modal-whatsapp" required>
               </div>
             </div>
             <div class="mb-2 row align-items-center">
-              <label for="modal-unit" class="col-4 col-form-label" style="text-align:right;">No. Unit :</label>
+              <label for="modal-unit" class="col-4 col-form-label" style="text-align:right;">Unit Number :</label>
               <div class="col-8">
                 <input type="number" class="form-control" id="modal-unit" required>
               </div>
@@ -181,10 +183,10 @@ function openBookingModal({date, hour}) {
         },
         focusConfirm: false,
         showCancelButton: true,
-        confirmButtonText: 'Simpan Booking',
-        cancelButtonText: 'Batal',
+        confirmButtonText: 'Save Booking',
+        cancelButtonText: 'Cancel',
         didOpen: () => {
-            // Event radio untuk jam akhir
+            // Event radio for end hour
             document.getElementById('duration1').addEventListener('change', function() {
                 if (this.checked) {
                     document.getElementById('modal-hour-end').value = '';
@@ -215,11 +217,11 @@ function openBookingModal({date, hour}) {
             const duration1 = document.getElementById('duration1').checked;
             let hourEnd = '';
             if (!unit || !name || !whatsapp) {
-                Swal.showValidationMessage('Semua field harus diisi!');
+                Swal.showValidationMessage('All fields are required!');
                 return false;
             }
             if (!/^\d+$/.test(whatsapp)) {
-                Swal.showValidationMessage('No. Whatsapp harus berupa angka!');
+                Swal.showValidationMessage('Whatsapp number must be numeric!');
                 return false;
             }
             if (!duration1) {
@@ -245,27 +247,26 @@ function openBookingModal({date, hour}) {
 
 // AJAX: Save booking
     function saveBooking({ date, hour, hourEnd, unit, name, whatsapp }, cellEl) {
-      fetch('booking-api.php?action=save', {
+    fetch('booking-api.php?action=save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'save', date, hour, hourEnd, unit, name, whatsapp })
-      })
-      .then(res => res.json())
-      .then(function(data) {
-          if (data.success === true) {
-                fetchBookings();
-                renderTodayBookingTable();
-                Swal.fire('Data tersimpan', 'Booking berhasil disimpan!', 'success');
-          }
-          if (!data.success) {
-                fetchBookings();
-                Swal.fire('Data Tidak Tersimpan', data.error, 'warning');
-          }
-      })
-      .catch((err) => {
-          console.error('Fetch error:', err);
-          Swal.fire('Terjadi kesalahan', 'Terjadi kesalahan saat menyimpan booking!', 'error');
-      });
+    })
+    .then(res => res.json())
+    .then(function(data) {
+        if (data.success === true) {
+            fetchBookings();
+            Swal.fire('Saved', 'Booking has been saved successfully!', 'success');
+        }
+        if (!data.success) {
+            fetchBookings();
+            Swal.fire('Not Saved', data.error, 'warning');
+        }
+    })
+    .catch((err) => {
+        console.error('Fetch error:', err);
+        Swal.fire('Error', 'An error occurred while saving the booking!', 'error');
+    });
   }
 
     // AJAX: Fetch bookings
@@ -292,8 +293,8 @@ function openBookingModal({date, hour}) {
                     bookedCells.add(cellKey);
                 }
             }
-            // Warnai cell kosong yang sudah lewat dengan abu-abu dan disable klik
-            document.querySelectorAll('.booking-cell').forEach(cell => {
+            // Warnai cell kosong yang sudah lewat dengan abu-abu and disable klik
+            document.querySelectorAll('#booking-calendar .booking-cell').forEach(cell => {
                 const cellKey = cell.getAttribute('data-date');
                 if (!cell.textContent) {
                     // Cek waktu cell
@@ -327,10 +328,9 @@ function openBookingModal({date, hour}) {
                         cell.style.cursor = '';
                     }
                 } else {
-                    cell.classList.add('disabled-cell');
                     cell.style.pointerEvents = '';
                     cell.style.cursor = '';
-                    cell.textContent = "";
+                    cell.textContent = '';
                 }
             });
         } else if (data.error) {
@@ -341,10 +341,6 @@ function openBookingModal({date, hour}) {
         alert('Terjadi kesalahan saat memuat data booking!');
     });
 }
-    
-    $(document).ready(function() {
-        renderTodayBookingTable();
-    });
 
     function renderTodayBookingTable() {
         const today = new Date();
@@ -366,17 +362,17 @@ function openBookingModal({date, hour}) {
             success: function(response) {
                 let bookings = response.bookings || {};
                 // Format tanggal: Senin, 01 Januari 2025
-                const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                const bulan = [
-                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const months = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
                 ];
-                const tglObj = new Date(dateStr);
-                const hariStr = hari[tglObj.getDay()];
-                const tglStr = tglObj.getDate().toString().padStart(2, '0');
-                const blnStr = bulan[tglObj.getMonth()];
-                const thnStr = tglObj.getFullYear();
-                const headerTanggal = `${hariStr}, ${tglStr} ${blnStr} ${thnStr}`;
+                const dateObj = new Date(dateStr);
+                const dayStr = days[dateObj.getDay()];
+                const dateNumStr = dateObj.getDate().toString().padStart(2, '0');
+                const monthStr = months[dateObj.getMonth()];
+                const yearStr = dateObj.getFullYear();
+                const headerTanggal = `${dayStr}, ${dateNumStr} ${monthStr} ${yearStr}`;
 
                 let html = '<table class="table table-bordered booking-table" style="min-height:550px">';
                 // Header merge dengan format lokal
@@ -411,14 +407,14 @@ function openBookingModal({date, hour}) {
                                     break;
                                 }
                             }
-                            let cls = 'available', label = 'Kosong';
+                            let cls = 'available', label = 'Available';
                             if (booked) {
                                 cls = 'booked';
                                 label = unit;
                                 // label = 'Booked';
                             } else if (jamNum < today.getHours()) {
                                 cls = 'past';
-                                label = 'Lewat';
+                                label = 'Past';
                             }
                             // Hilangkan pointer dan event
                             html += `<td class="booking-cell ${cls}" style="vertical-align:middle; text-align:center; position:relative; min-width:80px; height:60px; cursor:default; pointer-events:none;">
