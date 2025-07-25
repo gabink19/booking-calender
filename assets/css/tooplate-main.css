@@ -278,7 +278,7 @@ nav a::before {
   width: 90%;
   height: 80%;
   left: 10%;
-  top: 10%;
+  top: 2%;
 }
 .content::-webkit-scrollbar {
   display: none!important;
@@ -415,7 +415,7 @@ nav a::before {
 
 /* Slide 2 Style */
 .second-content {
-	top: 146%!important;
+	top: 146%;
 	transform: translateY(-180%);
 }
 #tabs {
@@ -742,11 +742,13 @@ nav a::before {
 .content.second-content {
     overflow: unset !important;
 }
+.second-content {
+  overflow-y: unset !important;
+}
 @media (max-width: 900px) {
     .booking-table th, .booking-table td {
         font-size: 0.85em;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
+        padding: 2px !important;
     }
     .booking-calendar-responsive {
         padding: 8px 0 4px 0;
@@ -756,8 +758,7 @@ nav a::before {
 @media (max-width: 600px) {
     .booking-table th, .booking-table td {
         font-size: 0.7em;
-        padding-left: 1px !important;
-        padding-right: 1px !important;
+        padding: 1px !important;
     }
     .booking-calendar-responsive {
         padding: 2px 0 2px 0;
@@ -772,12 +773,15 @@ nav a::before {
 @media (max-width: 991px) {
 
   .slides .slide .content {
-	width: 100%;
-	height: 90%;
-	left: 0;
+    width: 100%;
+    height: 90%;
+    left: 0;
+    top: 8%;
+  }
+  table{
+    height: 200vw;
   }
   .second-content {
-	top: 237%!important;
 	transform: translateY(-250%);
   }
   .third-content {
@@ -925,4 +929,29 @@ nav a::before {
     font-weight: 900;
     color: #fff;
     margin-top: 0px;
+}
+
+.second-content {
+  position: relative;
+  top: 1vh; /* default mengikuti tinggi nav desktop */
+  transform: none;
+}
+
+@media (max-width: 991px) {
+  .second-content {
+    top: 80px; /* mengikuti tinggi nav mobile */
+    transform: none;
+  }
+}
+@media (max-height: 1000px) and (max-width: 991px) {
+  .second-content {
+    top: 10% !important; /* mengikuti tinggi nav mobile */
+    transform: none;
+  }
+}
+@media (max-height: 780px) and (max-width: 991px) {
+  .second-content {
+    top: 13% !important; /* mengikuti tinggi nav mobile */
+    transform: none;
+  }
 }

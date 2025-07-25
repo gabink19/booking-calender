@@ -3,7 +3,8 @@
   overflow-y: auto !important;
   overflow-x: unset;
   width: 100%;
-  max-height: 620px;
+  height: 100%; /* Ikuti parent */
+  max-height: 100%;
   scrollbar-width: none; /* Firefox */
 }
 #booking-calendar::-webkit-scrollbar {
@@ -14,6 +15,13 @@
 /* Sticky table header for booking calendar */
 .booking-calendar-responsive {
   position: relative;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh; /* Tinggi penuh layar */
+  max-height: 100vh; /* Maksimal penuh layar */
+  overflow-x: auto;
+  overflow-y: auto;
+  padding-bottom: 8px;
 }
 .booking-table thead th {
   position: sticky;
@@ -59,7 +67,7 @@
 }
 .booking-table {
     border-radius: 0px;
-    overflow: hidden;
+    overflow: unset;
     box-shadow: 0 1.5px 4px #007bff11;
 }
 .booking-table th {
@@ -135,31 +143,77 @@
 .content.second-content {
     overflow: unset !important;
 }
-@media (max-width: 900px) {
-    .booking-table th, .booking-table td {
-        font-size: 0.85em;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-    }
-    .booking-calendar-responsive {
-        padding: 8px 0 4px 0;
-        /* max-height: 550px; */
-        max-height: 95%;
-        margin-top: 30px;
-    }
+/* Responsive booking-calendar */
+.booking-calendar-responsive {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  min-height: 400px;  
 }
+
+.booking-table {
+  /*min-width: 700px;  agar tidak pecah di mobile, bisa disesuaikan */
+  width: 100%;
+  table-layout: fixed;
+}
+
+@media (max-width: 900px) {
+  .booking-calendar-responsive {
+    min-height: 300px; /* Responsive di tablet */
+    height: 80vh;
+    max-height: 80vh;
+  }
+  #booking-calendar {
+    height: 100%;
+    max-height: 100%;
+  }
+}
+
 @media (max-width: 600px) {
-    .booking-table th, .booking-table td {
-        font-size: 0.7em;
-        padding-left: 1px !important;
-        padding-right: 1px !important;
-    }
-    .booking-calendar-responsive {
-        padding: 2px 0 2px 0;
-        max-height: 550px;
-        max-height: 80%;
-        overflow-x: auto;
-    }
+  .booking-calendar-responsive {
+    min-height: 200px; /* Responsive di mobile */
+    height: 65vh;
+    max-height: 65vh;
+    padding: 0;
+    max-width: 100vw;
+  }
+  #booking-calendar {
+    height: 100%;
+    max-height: 100%;
+  }
+}
+@media (max-width: 1300px) {
+  .booking-calendar-responsive {
+    min-height: 500px;
+    height: 75vh;
+    max-height: 900px;
+    overflow-y: auto;
+    overflow-x: auto;
+    /* padding: 8px 0; */
+  }
+  #booking-calendar {
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+}
+@media (min-width: 1300px) {
+  .booking-calendar-responsive {
+    min-height: 650px;
+    height: 85vh;
+    max-height: 1100px;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 0 0 20px 0;
+  }
+  #booking-calendar {
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
 }
 /* booking-table coloring */
 .booking-cell.available { background: #d4edda; color: #155724; }
@@ -190,4 +244,51 @@
     z-index: 2; /* agar berada di atas konten body */
     padding: 8px;
     border-bottom: 1px solid #ccc;
+}
+#today-booking-table {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-y: hidden; /* Tidak bisa scroll vertikal */
+  padding: 0;
+}
+
+#today-booking-table .booking-table {
+  width: 100%;
+  min-width: unset;
+  table-layout: fixed;
+  margin-bottom: 0;
+}
+
+#today-booking-table .booking-table td,
+#today-booking-table .booking-table th {
+  padding: 2px 1px !important; /* Lebih padat */
+  font-size: 1.1em !important;
+  height: 28px !important;
+  vertical-align: middle !important;
+  word-break: break-word;
+}
+
+#today-booking-table .booking-table th {
+  background: #007bff !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  #today-booking-table .booking-table td,
+  #today-booking-table .booking-table th {
+    padding: 2px 1px !important;
+    font-size: 0.9em !important;
+    height: 32px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #today-booking-table .booking-table td,
+  #today-booking-table .booking-table th {
+    padding: 1px !important;
+    font-size: 1em !important;
+    height: 28px !important;
+  }
 }

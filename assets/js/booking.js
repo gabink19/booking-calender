@@ -36,7 +36,7 @@
         const now = new Date();
         for (let hour = 0; hour < 24; hour++) {
             const hourLabel = hour.toString().padStart(2, '0') + ':00';
-            html += `<tr>`;
+            html += `<tr style="height: 10px;">`;
             html += `<td class="sticky-col" style="background:#f8f9fa; font-weight:600; color:#555;">${hourLabel}</td>`;
             days.forEach(day => {
                 const cellDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), hour, 0, 0, 0);
@@ -392,7 +392,7 @@ function openBookingModal({date, hour}) {
                 // Header merge dengan format lokal
                 html += `<thead>
                     <tr>
-                        <th colspan="6" style="text-align:center; font-size:1.1em;">
+                        <th colspan="4" style="text-align:center; font-size:1.1em;">
                             ${headerTanggal}
                         </th>
                     </tr>
