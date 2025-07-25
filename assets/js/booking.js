@@ -20,7 +20,7 @@
         const days = getNext7Days();
         let html = `
         <div class="booking-calendar-responsive">
-        <table class="table table-bordered text-center align-middle booking-table sticky-table" style="width:100%; margin-bottom:0; table-layout:fixed;">
+        <table class="table table-bordered text-center align-middle booking-table sticky-table" style="width:100%; margin-bottom:50px; table-layout:fixed;">
             <colgroup>
                 <col style="width: 60px;"> <!-- Kolom jam -->
                 ${days.map(() => '<col style="width: calc((100% - 60px)/7);">').join('')}
@@ -37,7 +37,7 @@
         for (let hour = 0; hour < 24; hour++) {
             const hourLabel = hour.toString().padStart(2, '0') + ':00';
             html += `<tr style="height: 10px;">`;
-            html += `<td class="sticky-col" style="background:#f8f9fa; font-weight:600; color:#555;">${hourLabel}</td>`;
+            html += `<td style="background:#f8f9fa; font-weight:600; color:#555;">${hourLabel}</td>`;
             days.forEach(day => {
                 const cellDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), hour, 0, 0, 0);
                 const cellId = `${day.date.getFullYear()}-${(day.date.getMonth()+1).toString().padStart(2,'0')}-${day.date.getDate().toString().padStart(2,'0')}_${hour.toString().padStart(2,'0')}`;
@@ -388,7 +388,7 @@ function openBookingModal({date, hour}) {
                 setInterval(updateClock, 500);
                 setTimeout(updateClock, 0);
 
-                let html = '<table class="table table-bordered booking-table" style="min-height:550px">';
+                let html = '<table class="table table-bordered booking-table today-table" style="margin-bottom:50px; ">';
                 // Header merge dengan format lokal
                 html += `<thead>
                     <tr>
@@ -431,7 +431,7 @@ function openBookingModal({date, hour}) {
                                 label = 'Past';
                             }
                             // Hilangkan pointer dan event
-                            html += `<td class="booking-cell ${cls}" style="vertical-align:middle; text-align:center; position:relative; min-width:80px; height:60px; cursor:default; pointer-events:none;">
+                            html += `<td class="booking-cell ${cls}" style="vertical-align:middle; text-align:center; position:relative; min-width:80px; cursor:default; pointer-events:none;">
                                 <span style="position:absolute; top:4px; left:6px; font-size:1.1em; color:#888;">${jam}</span>
                                 <span style="display:inline-block; margin-top:12px;font-size:1.1em !important;">${label}</span>
                             </td>`;
