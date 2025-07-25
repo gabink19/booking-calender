@@ -145,6 +145,7 @@
         padding: 8px 0 4px 0;
         /* max-height: 550px; */
         max-height: 95%;
+        margin-top: 30px;
     }
 }
 @media (max-width: 600px) {
