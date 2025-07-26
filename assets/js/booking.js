@@ -214,7 +214,7 @@ function openBookingModal({date, hour}) {
             });
         },
         didClose:() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
         },
         preConfirm: () => {
             const name = document.getElementById('modal-name').value.trim();
@@ -244,6 +244,7 @@ function openBookingModal({date, hour}) {
             };
         }
     }).then((result) => {
+        window.scrollTo(0, 0);
         if (result.isConfirmed && result.value) {
             saveBooking(result.value);
         }
