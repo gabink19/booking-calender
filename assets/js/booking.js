@@ -117,10 +117,13 @@
     // Init calendar on About Us slide show
     document.addEventListener('DOMContentLoaded', function() {
         renderTodayBookingTable();
+        renderBooking();
+    });
+    function renderBooking() {
         renderBookingCalendar();
         document.getElementById('booking-calendar').addEventListener('click', handleBookingCellClick);
         addBookingCellHover();
-    });
+    }
 
 // Untuk membuka modal booking:
 function openBookingModal({date, hour}) {
@@ -209,6 +212,9 @@ function openBookingModal({date, hour}) {
                     }
                 }
             });
+        },
+        didClose:() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
         preConfirm: () => {
             const name = document.getElementById('modal-name').value.trim();

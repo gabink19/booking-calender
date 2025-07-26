@@ -416,7 +416,7 @@ nav a::before {
 /* Slide 2 Style */
 .second-content {
 	top: 146%;
-	transform: translateY(-180%);
+	/* transform: translateY(-180%); */
 }
 #tabs {
   float: right;
@@ -776,7 +776,7 @@ nav a::before {
     width: 100%;
     height: 90%;
     left: 0;
-    top: 8%;
+    /* top: 8%; */
   }
   table{
     height: 200vw;
@@ -814,6 +814,7 @@ nav a::before {
     background-color: #faf5b2;
   }
   nav {
+    position: static;
     top: 0vh;
     height: 80px;
     width: 100%;
@@ -933,25 +934,17 @@ nav a::before {
 
 .second-content {
   position: relative;
-  top: 1vh; /* default mengikuti tinggi nav desktop */
+  top: 50px; /* default mengikuti tinggi nav desktop */
   transform: none;
 }
-
-@media (max-width: 991px) {
-  .second-content {
-    top: 80px; /* mengikuti tinggi nav mobile */
-    transform: none;
-  }
-}
-@media (max-height: 1000px) and (max-width: 991px) {
-  .second-content {
-    top: 10% !important; /* mengikuti tinggi nav mobile */
-    transform: none;
-  }
-}
-@media (max-height: 780px) and (max-width: 991px) {
-  .second-content {
-    top: 13% !important; /* mengikuti tinggi nav mobile */
-    transform: none;
+@media (max-height: 400px) {
+  .content.second-content {
+    height: 90vh !important;
+    min-height: 0 !important;
+    max-height: 98vh !important;
+    overflow-y: auto !important;
+    top: 0 !important;
+    transform: none !important;
+    padding-bottom: 10px !important;
   }
 }

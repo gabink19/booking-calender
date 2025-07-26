@@ -4,7 +4,7 @@
   <head>
 
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="Tooplate">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" rel="stylesheet">
@@ -96,6 +96,11 @@
             </div>
         </div>
     </div>
+    <!-- Tampilkan ukuran layar -->
+    <div id="screen-size-info" style="position:fixed;bottom:10px;right:10px;z-index:99999;background:#222;color:#fff;padding:6px 14px;border-radius:8px;font-size:14px;opacity:0.8;">
+      0 x 0
+    </div>
+
 
 
     <!-- Bootstrap core JavaScript -->
@@ -145,6 +150,21 @@
             };
         }
     </script>
-
+<script>
+function updateScreenSizeInfo() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  var el = document.getElementById('screen-size-info');
+  if (el) {
+    el.style.display = 'block';
+    el.textContent = w + ' x ' + h;
+  }
+}
+window.addEventListener('resize', updateScreenSizeInfo);
+window.addEventListener('orientationchange', updateScreenSizeInfo);
+window.addEventListener('focus', updateScreenSizeInfo);
+window.addEventListener('touchstart', updateScreenSizeInfo);
+document.addEventListener('DOMContentLoaded', updateScreenSizeInfo);
+</script>
   </body>
 </html>
