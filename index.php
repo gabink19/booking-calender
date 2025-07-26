@@ -12,14 +12,13 @@
     <title>Booking Page</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="vendor/bootstrap/css/bootstrap.min.css?version=<?=time()?>" rel="stylesheet">
 
     <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="assets/css/fontawesome.css">
-    <link rel="stylesheet" href="assets/css/tooplate-main.css?version=1.0.6">
-    <link rel="stylesheet" href="assets/css/owl.css">
-    <link rel="stylesheet" href="assets/css/booking.css?version=1.0.6">
+    <link rel="stylesheet" href="assets/css/fontawesome.css?version=<?=time()?>">
+    <link rel="stylesheet" href="assets/css/tooplate-main.css?version=<?=time()?>">
+    <link rel="stylesheet" href="assets/css/owl.css?version=<?=time()?>">
+    <link rel="stylesheet" href="assets/css/booking.css?version=<?=time()?>">
 
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -100,15 +99,14 @@
 
 
     <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
+    <script src="vendor/jquery/jquery.min.js?version=<?=time()?>"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js?version=<?=time()?>"></script>
 
     <!-- Additional Scripts -->
-    <script src="assets/js/owl.js"></script>
-    <script src="assets/js/accordations.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/booking.js?version=1.0.6"></script>
+    <script src="assets/js/owl.js?version=<?=time()?>"></script>
+    <script src="assets/js/accordations.js?version=<?=time()?>"></script>
+    <script src="assets/js/main.js?version=<?=time()?>"></script>
+    <script src="assets/js/booking.js?version=<?=time()?>"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
