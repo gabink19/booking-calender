@@ -1,18 +1,4 @@
 <?php
-
-// Secret token dari GitHub (set saat membuat webhook)
-$githubSecret = "190595";
-
-// Cek apakah request datang dari GitHub
-$signature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
-$payload = file_get_contents('php://input');
-
-$expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $githubSecret);
-if (!hash_equals($expectedSignature, $signature)) {
-    http_response_code(403);
-    die("Unauthorized access");
-}
-
 // Tentukan direktori proyek Git
 // $repoDir = '..'; // Ganti dengan path repo Anda
 

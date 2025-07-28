@@ -1,0 +1,185 @@
+<?php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Booking;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
+use App\Notifications\BookingWhatsappNotification;
+
+class BookingController extends Controller
+{
+    // Tampilkan halaman booking
+    public function index(Request $request)
+    {
+        $wa = '0812-1234-5678'; // Nomor admin
+        $dates = $this->getWeekDates();
+        $selectedDate = $request->input('date', $dates[0]);
+        $slots = $this->getSlots();
+
+        return view('booking', compact('wa', 'dates', 'selectedDate', 'slots'));
+    }
+
+    // Proses booking
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'date' => 'required|date',
+                'hour' => 'required|integer',
+                'hourEnd' => 'nullable|integer|gt:hour',
+                'unit' => 'required|string',
+                'durationRadio' => 'required|in:1,2',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => $e->validator->errors()->first()
+            ], 422);
+        }
+        $newDateFormat = Carbon::parse($request->date)->format('Y-m-d');
+        // Validasi tidak boleh booking di tanggal & jam yang sama dengan status active (untuk unit apapun)
+        $existing = Booking::where('date', $newDateFormat)
+            ->where('hour', $request->hour)
+            ->where('status', 'active')
+            ->count();
+        if ($existing>0) {
+            return response()->json(['error' => 'Slot pada tanggal dan jam tersebut sudah dipesan!']);
+        }
+        $nowBookCount = 1;
+        if ($request->hourEnd!=null) {
+            $nowBookCount++;
+        }
+        // Cek booking per hari maksimal 2 jam untuk unit yang sama
+        $unitDayBookings = Booking::where('unit', $request->unit)
+            ->where('date', $newDateFormat)
+            ->where('status', 'active')
+            ->count();
+        if ($unitDayBookings+$nowBookCount > 2) {
+            return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama!']);
+        }
+
+        // Cek booking per minggu maksimal 4 jam untuk unit yang sama
+        $startOfWeek = Carbon::parse($newDateFormat)->startOfWeek(Carbon::MONDAY)->toDateString();
+        $endOfWeek = Carbon::parse($newDateFormat)->endOfWeek(Carbon::SUNDAY)->toDateString();
+        $unitWeekBookings = Booking::where('unit', $request->unit)
+            ->whereBetween('date', [$startOfWeek, $endOfWeek])
+            ->where('status', 'active')
+            ->count();
+        if ($unitWeekBookings >= 4) {
+            return response()->json(['error' => 'Maksimal 4 jam per unit di minggu yang sama!']);
+        }
+
+        $booking = Booking::create([
+            'date' => $newDateFormat,
+            'hour' => (int)$request->hour,
+            'unit' => $request->unit,
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        if ($request->hourEnd!=null) {
+                $booking = Booking::create([
+                    'date' => $newDateFormat,
+                    'hour' => (int)$request->hourEnd,
+                    'unit' => $request->unit,
+                    'status' => 'active',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+        }
+        // Kirim notifikasi WhatsApp (gunakan Notification atau API eksternal)
+        // Notification::route('whatsapp', $booking->whatsapp)
+        //     ->notify(new BookingWhatsappNotification($booking));
+
+        return response()->json(['success' => true, 'message' => 'Booking berhasil! Notifikasi WA dikirim.']);
+    }
+
+    // Cancel booking (minimal 1 jam sebelum mulai)
+    public function cancel(Request $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+        $now = Carbon::now();
+        $start = Carbon::parse($booking->date . ' ' . $booking->hour_start . ':00:00');
+        if ($start->diffInMinutes($now, false) > -60) {
+            return back()->with('error', 'Cancel hanya bisa 1 jam sebelum jam mulai!');
+        }
+        $booking->status = 'cancelled';
+        $booking->updated_at = now();
+        $booking->save();
+        return back()->with('success', 'Booking berhasil dibatalkan.');
+    }
+
+    // Export data booking (CSV)
+    public function export(Request $request)
+    {
+        $bookings = Booking::all();
+        $filename = 'bookings-' . date('Ymd') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+        $callback = function() use ($bookings) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Tanggal', 'Jam Mulai', 'Jam Selesai', 'Unit', 'Nama', 'WA', 'Status']);
+            foreach ($bookings as $b) {
+                fputcsv($handle, [
+                    $b->date, $b->hour_start, $b->hour_end, $b->unit, $b->name, $b->whatsapp, $b->status
+                ]);
+            }
+            fclose($handle);
+        };
+        return response()->stream($callback, 200, $headers);
+    }
+
+    // Helper: Dapatkan tanggal minggu ini (Senin-Minggu)
+    private function getWeekDates()
+    {
+        $mulai = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $tanggal = [];
+        for ($i = 0; $i < 7; $i++) {
+            $carbon = $mulai->copy()->addDays($i)->locale('id');
+            $tanggal[] = [
+                'tanggal' => $carbon->toDateString(),
+                'hari' => $carbon->translatedFormat('l'), // Nama hari dalam bahasa Indonesia
+            ];
+        }
+        return $tanggal;
+    }
+
+    // Helper: Dapatkan slot waktu per hari
+    private function getSlots($selectedDate = null)
+    {
+        $newDateFormat = Carbon::parse($selectedDate)->format('Y-m-d');
+        $date = $newDateFormat ?? Carbon::today()->toDateString();
+        $slots = [];
+        for ($h = 6; $h < 22; $h++) {
+            // Cek status booking di database
+            $isBooked = Booking::where('date', $date)
+                ->where('hour', $h)
+                ->where('status', 'active')
+                ->exists();
+
+            $status = $isBooked ? 'Dipesan' : 'Tersedia';
+
+            $slots[] = [
+                'date' => $date,
+                'hour' => $h,
+                'label' => sprintf('%02d:00 - %02d:59', $h, $h),
+                'status' => $status,
+            ];
+        }
+        return $slots;
+    }
+
+    public function ajaxSlots(Request $request)
+    {
+        $date = $request->input('date');
+        $slots = $this->getSlots($date);
+        // Render slot sebagai HTML fragment
+        $html = view('partials.slot_grid', compact('slots'))->render();
+        return response()->json(['html' => $html]);
+    }
+}

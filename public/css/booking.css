@@ -1,0 +1,255 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #fff url('../images/bg-booking.jpg') no-repeat center center fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  /* For bottom nav space */
+  padding-bottom: 62px;
+  box-sizing: border-box;
+}
+.container {
+  margin: 0 auto;
+  /* background: #fff; */
+  padding: 30px 28px 10px 28px; /* Padding atas, kiri, kanan */
+}
+.header {
+  background: #4B8DDD;
+  color: #fff;
+  border-radius: 12px;
+  padding: 20px 10px 16px 10px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.header h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.55rem;
+  font-weight: bold;
+}
+.header p {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+.contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-top: 7px;
+  gap: 5px;
+}
+.phone-icon {
+  vertical-align: middle;
+}
+.alert-success {
+  background: #DFF9E1;
+  color: #256029;
+  border-radius: 8px;
+  padding: 13px 12px 13px 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  font-size: 1.08rem;
+  gap: 8px;
+}
+.alert-icon {
+  font-size: 1.3em;
+  margin-right: 6px;
+}
+.section {
+  margin-bottom: 16px;
+}
+.label-tanggal {
+  font-size: 1.18rem;
+  font-weight: bold;
+}
+.tanggal-list {
+  display: flex;
+  gap: 8px;
+  margin-top: 7px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+}
+.tanggal-btn {
+  border: none;
+  background: #E6F4EF;
+  color: #233;
+  border-radius: 8px;
+  padding: 6px 10px 5px 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  min-width: 58px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  outline: none;
+}
+.tanggal-btn.selected,
+.tanggal-btn:active {
+  background: #183C34;
+  color: #fff;
+}
+.tanggal-btn span {
+  font-size: 0.95em;
+  margin-top: 2px;
+}
+.label-slot {
+  margin-bottom: 10px;
+  font-size: 1.12rem;
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.slot {
+  background: #E6FDF1;
+  border: none;
+  border-radius: 10px;
+  padding: 22px 4px 13px 4px;
+  font-size: 1.1rem;
+  color: #183C34;
+  box-shadow: 0 2px 4px #0001;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.13s;
+  font-weight: 500;
+  position: relative;
+}
+.slot span {
+  display: block;
+  font-size: 1em;
+  margin-top: 2px;
+  color: #326d46;
+  font-weight: 400;
+}
+.slot.selected {
+  background: #183C34;
+  color: #fff;
+}
+.notif {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.08rem;
+  margin-bottom: 0;
+  margin-top: 2px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.wa-btn {
+  display: flex;
+  align-items: center;
+  background: #25D366;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 14px 6px 10px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05em;
+  margin-left: 5px;
+  box-shadow: 0 1px 3px #0002;
+  transition: background 0.15s;
+}
+.wa-btn:hover {
+  background: #1EBE57;
+}
+.wa-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 6px;
+}
+.slot-booked {
+  background: #f8d7da !important;
+  color: #721c24 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border: 2px solid #dc3545 !important;
+}
+.slot-past {
+  background: #e9ecef !important;
+  color: #aaa !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+/* ===== Bottom Navigation ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100vw;
+  margin: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border-top: 1px solid #e2e2e2;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 56px;
+  box-shadow: 0 -2px 8px #0001;
+  transition: none !important;
+  pointer-events: auto;
+}
+.nav-btn {
+  background: none;
+  border: none;
+  outline: none;
+  flex: 1 1 0;
+  padding: 0 0 2px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #4B8DDD;
+  font-size: 0.93em;
+  cursor: pointer;
+  transition: color 0.15s;
+  height: 100%;
+  justify-content: center;
+}
+.nav-btn.active,
+.nav-btn:active {
+  color: #183C34;
+  background: #e8f4ff; /* Tambahkan background untuk tombol aktif */
+  border-radius: 10px 10px 0 0;
+}
+.nav-btn .nav-icon svg {
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 2px;
+  width: 24px;
+  height: 24px;
+}
+.nav-label {
+  font-size: 0.93em;
+}
+@media (max-width: 440px) {
+  .header { padding: 14px 5px 8px 5px; }
+  .container { padding: 18px 14px 2px 14px; }
+  .slot-grid { grid-template-columns: repeat(2, 1fr); }
+  .bottom-nav {
+    /* max-width: 100vw; */
+    /* left: 50%; */
+    /* transform: translateX(-50%); */
+  }
+}
+@media (max-width: 340px) {
+  .slot-grid { grid-template-columns: 1fr; }
+  .tanggal-list { gap: 4px; }
+  .nav-label { font-size: 0.8em; }
+}
+@media (min-width: 501px) {
+  .container, .bottom-nav {
+    border-left: 1px solid #e2e2e2;
+    border-right: 1px solid #e2e2e2;
+  }
+  .bottom-nav {
+    /* left: 50%; */
+    /* transform: translateX(-50%); */
+    /* max-width: 420px; */
+  }
+}

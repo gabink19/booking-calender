@@ -1,12 +1,22 @@
 -- Migration: bookings table for MySQL
 CREATE TABLE IF NOT EXISTS bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,  
     date DATE NOT NULL,
     hour TINYINT UNSIGNED NOT NULL,
     unit VARCHAR(32) NOT NULL,
-    name VARCHAR(128) NOT NULL,
-    whatsapp VARCHAR(32) NOT NULL,
+    status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (date, hour, unit)
+    updated_at DATETIME DEFAULT NULL,
+    notified_at DATETIME DEFAULT NULL,
+    CONSTRAINT uc_booking UNIQUE (date, hour)
 );
--- Example:
--- INSERT INTO bookings (date, hour, unit, name, whatsapp) VALUES ('2025-07-23', 10, 'A1', 'Budi', '08123456789');
+
+-- Tabel users (minimal)
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(64) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    unit VARCHAR(32) NOT NULL,
+    whatsapp VARCHAR(32) NOT NULL
+);
