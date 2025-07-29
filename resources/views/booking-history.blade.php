@@ -23,21 +23,26 @@
     @endif
     <div class="section">
       <div class="slot-grid" style="display: block !important;">
-        @foreach($bookings as $booking)
-          @php
-            // Cek apakah slot sudah lewat
-            $isPast = \Carbon\Carbon::parse($booking->date.' '.$booking->hour.':00') < now();
-            $isBooked = $booking->status == 'cancelled';
-            $slotClass = '';
-            $status = "Aktif";
-            if ($isBooked) {
-              $slotClass = 'slot-booked';
-              $status = "Dibatalkan";
-            } elseif ($isPast) {
-              $slotClass = 'slot-past';
-              $status = "Lewat";
-            }
-            $disabled = $isPast ? 'disabled' : '';
+        @if(count($bookings) === 0)
+          <div style="text-align:center;color:#888;padding:40px 0 30px 0;font-size:18px;">
+            Anda belum pernah melakukan pemesanan.
+          </div>
+        @else
+          @foreach($bookings as $booking)
+            @php
+              // Cek apakah slot sudah lewat
+              $isPast = \Carbon\Carbon::parse($booking->date.' '.$booking->hour.':00') < now();
+              $isBooked = $booking->status == 'cancelled';
+              $slotClass = '';
+              $status = "Aktif";
+              if ($isBooked) {
+                $slotClass = 'slot-booked';
+                $status = "Dibatalkan";
+              } elseif ($isPast) {
+                $slotClass = 'slot-past';
+                $status = "Lewat";
+              }
+              $disabled = $isPast ? 'disabled' : '';
             @endphp
             <button style="text-align: justify;padding: 12px 16px;width:100% !important;margin-bottom:10px;cursor:default;" class="slot {{ $slotClass }}" data-hour="{{ $booking->hour }}" data-date="{{ $booking->date }}" data-hourVal="{{ $booking->hour }}" {{ $disabled }}>
               Tanggal Pemesanan: {{ \Carbon\Carbon::parse($booking->date)->locale('id')->translatedFormat('d F Y') }} {{ $booking->hour }}:00 - {{ $booking->hour }}:59<br>
@@ -52,7 +57,8 @@
                 </span>
               @endif
             </button>
-        @endforeach
+          @endforeach
+        @endif
       </div>
     </div>
 
