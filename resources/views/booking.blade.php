@@ -115,6 +115,14 @@
           localStorage.setItem(key, Date.now());
         });
       });
+
+      // Otomatis klik tanggal hari ini jika ada
+      document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const todayStr = today.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+        const btn = Array.from(document.querySelectorAll('.tanggal-btn')).find(b => b.dataset.date === todayStr);
+        if (btn) btn.click();
+      });
     </script>
   </div>
   <nav class="bottom-nav">

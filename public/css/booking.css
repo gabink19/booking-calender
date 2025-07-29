@@ -176,6 +176,12 @@ body {
   pointer-events: none !important;
   border: 1px solid #dee2e6 !important;
 }
+.span-slot-booked {
+  color: #721c24 !important;
+}
+.span-slot-past {
+  color: #aaa !important;
+}
 
 /* ===== Bottom Navigation ===== */
 .bottom-nav {

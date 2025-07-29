@@ -7,16 +7,16 @@ CREATE TABLE IF NOT EXISTS bookings (
     status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT NULL,
-    notified_at DATETIME DEFAULT NULL,
-    CONSTRAINT uc_booking UNIQUE (date, hour)
+    notified_at DATETIME DEFAULT NULL
 );
 
 -- Tabel users (minimal)
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE DEFAULT (UUID()),
     username VARCHAR(64) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(128) NOT NULL,
     unit VARCHAR(32) NOT NULL,
-    whatsapp VARCHAR(32) NOT NULL
+    whatsapp VARCHAR(32) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

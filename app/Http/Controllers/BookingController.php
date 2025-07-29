@@ -19,6 +19,17 @@ class BookingController extends Controller
         $dates = $this->getWeekDates();
         $selectedDate = $request->input('date', $dates[0]);
         $slots = $this->getSlots();
+        $userId = session('user_id');
+        $user = User::select('name', 'unit', 'whatsapp')->where('uuid', $userId)->first();
+
+        // Simpan data ke localStorage via JavaScript
+        echo "<script>
+            localStorage.setItem('user', JSON.stringify({
+                name: " . json_encode($user->name) . ",
+                unit: " . json_encode($user->unit) . ",
+                whatsapp: " . json_encode($user->whatsapp) . "
+            }));
+        </script>";
 
         return view('booking', compact('wa', 'dates', 'selectedDate', 'slots'));
     }
@@ -58,7 +69,7 @@ class BookingController extends Controller
             ->where('status', 'active')
             ->count();
         if ($unitDayBookings+$nowBookCount > 2) {
-            return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama!']);
+            return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
         }
 
         // Cek booking per minggu maksimal 4 jam untuk unit yang sama
@@ -69,9 +80,12 @@ class BookingController extends Controller
             ->where('status', 'active')
             ->count();
         if ($unitWeekBookings >= 4) {
-            return response()->json(['error' => 'Maksimal 4 jam per unit di minggu yang sama!']);
+            return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
         }
-
+        $unit = session('unit');
+        if ($unit) {
+            $request->merge(['unit' => $unit]);
+        }
         $booking = Booking::create([
             'date' => $newDateFormat,
             'hour' => (int)$request->hour,
@@ -94,7 +108,7 @@ class BookingController extends Controller
         // Notification::route('whatsapp', $booking->whatsapp)
         //     ->notify(new BookingWhatsappNotification($booking));
 
-        return response()->json(['success' => true, 'message' => 'Booking berhasil! Notifikasi WA dikirim.']);
+        return response()->json(['success' => true, 'message' => 'Booking berhasil!']);
     }
 
     // Cancel booking (minimal 1 jam sebelum mulai)
@@ -102,14 +116,20 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
         $now = Carbon::now();
-        $start = Carbon::parse($booking->date . ' ' . $booking->hour_start . ':00:00');
+        $start = Carbon::parse($booking->date . ' ' . $booking->hour . ':00:00');
         if ($start->diffInMinutes($now, false) > -60) {
-            return back()->with('error', 'Cancel hanya bisa 1 jam sebelum jam mulai!');
+            return response()->json([
+                'success' => false,
+                'error' => 'Cancel hanya bisa 1 jam sebelum jam mulai!'
+            ]);
         }
         $booking->status = 'cancelled';
         $booking->updated_at = now();
         $booking->save();
-        return back()->with('success', 'Booking berhasil dibatalkan.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Pemesanan berhasil dibatalkan.'
+        ]);
     }
 
     // Export data booking (CSV)
@@ -181,5 +201,25 @@ class BookingController extends Controller
         // Render slot sebagai HTML fragment
         $html = view('partials.slot_grid', compact('slots'))->render();
         return response()->json(['html' => $html]);
+    }
+    
+    public function history(Request $request)
+    {
+        $unit = session('unit');
+        if (!$unit) {
+            return redirect('/')->with('error', 'Unit tidak ditemukan di sesi.');
+        }
+        $bookings = Booking::where('unit', $unit)
+            ->orderBy('date', 'desc')
+            ->orderBy('hour', 'desc')
+            ->get();
+
+        return view('booking-history', compact('bookings', 'unit'));
+    }
+    public function profil()
+    {
+        $userId = session('user_id');
+        $user = User::select('username','name', 'unit', 'whatsapp','created_at')->where('uuid', $userId)->first();
+        return view('profil', compact('user'));
     }
 }
