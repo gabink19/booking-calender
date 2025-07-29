@@ -78,9 +78,9 @@ function openBookingModal({date, hour, hourVal}) {
         box-sizing: border-box;
       }
       #bookingFormSwal .hour-input {
-        width: 90px !important;
+        width: 100px !important;
         padding: 6px 8px;
-        font-size: 12px !important;
+        font-size: 13px !important;
       }
       #bookingFormSwal .form-row {
         display: flex;
@@ -113,10 +113,11 @@ function openBookingModal({date, hour, hourVal}) {
         </div>
         <div class="form-row">
           <label>Jam :</label>
-          <div style="flex:1;display:flex;align-items:center;gap:6px;">
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
             <input type="text" id="modal-hour-display" class="hour-input" value="${hour.padStart(2,'0')}" disabled>
-            <span id="sampai-label" style="margin:0 4px; display:none;">&</span>
-            <input type="text" id="modal-hour-end-display" class="hour-input" style="display:none;" disabled>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="text" id="modal-hour-end-display" class="hour-input" style="display:none;" disabled>
+            </div>
           </div>
         </div>
         <div class="form-row">
