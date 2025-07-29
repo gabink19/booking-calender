@@ -26,7 +26,7 @@
       </div>
     @endif
     <label class="label-tanggal">Pilih Tanggal:</label>
-    <div class="section" style="overflow-x: auto; white-space: nowrap;">
+    <div class="section" style="overflow-x: auto; white-space: nowrap; scrollbar-width: none; -ms-overflow-style: none;">
       <div class="tanggal-list" style="display: flex; flex-direction: row; gap: 10px; white-space: nowrap; min-width: max-content;">
         @foreach($dates as $date)
         @php
