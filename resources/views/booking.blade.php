@@ -25,8 +25,8 @@
         {{ session('success') }}
       </div>
     @endif
+    <label class="label-tanggal">Pilih Tanggal:</label>
     <div class="section" style="overflow-x: auto; white-space: nowrap;">
-      <label class="label-tanggal">Pilih Tanggal:</label>
       <div class="tanggal-list" style="display: flex; flex-direction: row; gap: 10px; white-space: nowrap; min-width: max-content;">
         @foreach($dates as $date)
         @php
