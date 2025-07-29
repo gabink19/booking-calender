@@ -25,9 +25,9 @@
         {{ session('success') }}
       </div>
     @endif
-    <div class="section">
+    <div class="section" style="overflow-x: auto; white-space: nowrap;">
       <label class="label-tanggal">Pilih Tanggal:</label>
-      <div class="tanggal-list">
+      <div class="tanggal-list" style="display: flex; flex-direction: row; gap: 10px; white-space: nowrap; min-width: max-content;">
         @foreach($dates as $date)
         @php
             $tanggalFormatted = \Carbon\Carbon::parse($date['tanggal'])->locale('id')->isoFormat('dddd, D MMMM Y');
@@ -36,6 +36,7 @@
             class="tanggal-btn{{ $loop->first ? ' selected' : '' }}" 
             data-date="{{ \Carbon\Carbon::parse($date['tanggal'])->format('d-m-Y') }}"
             onclick="document.getElementById('selected-date-string').innerHTML = 'Slot Waktu Tersedia untuk <b>{{ $tanggalFormatted }}</b>:';"
+            style="min-width: 90px; white-space: normal;"
           >
             {{ $date['hari'] }}<br>
             <span>{{ \Carbon\Carbon::parse($date['tanggal'])->format('d/m') }}</span>
