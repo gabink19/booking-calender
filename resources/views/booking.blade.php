@@ -71,10 +71,11 @@
               $slotClass = 'slot-past';
             }
             $disabled = ($isBooked || $isPast) ? 'disabled' : '';
+            $bookstats= ($slot['units']=='') ? $slot['status'] : $slot['units'];
           @endphp
           <button class="slot {{ $slotClass }}" data-hour="{{ $slot['label'] }}" data-date="{{ $slot['date'] }}" data-hourVal="{{ $slot['hour'] }}" {{ $disabled }}>
             {{ $slot['label'] }}<br>
-            <span>{!! $slot['status'] . $slot['units'] !!}</span>
+            <span>{ $bookstats }</span>
           </button>
         @endforeach
       </div>

@@ -182,7 +182,7 @@ class BookingController extends Controller
         // Buat array jam => [unit1, unit2, ...]
         $bookedHours = [];
         foreach ($booked as $b) {
-            $bookedHours[$b->hour][] = $b->unit;
+            $bookedHours[$b->hour] = $b->unit;
         }
 
         $slots = [];
@@ -190,11 +190,15 @@ class BookingController extends Controller
         for ($h = 6; $h < 22; $h++) {
             $isBooked = isset($bookedHours[$h]);
             $status = $isBooked ? 'Dipesan' : 'Tersedia';
-            $unitsBooked = $isBooked ? implode(', ', $bookedHours[$h]) : '';
-            if ($status=='Dipesan') {
-                $unitsBooked = ' <br> '.$unitsBooked;
+            $unitsBooked = '';
+            $unitsBookedH = '';
+            if ($isBooked) {
+                $unitsBookedH = $bookedHours[$h];
             }
-            if ($unit==$unitsBooked) {
+            if ($status=='Dipesan') {
+                $unitsBooked = $unitsBookedH;
+            }
+            if ($unit==$unitsBookedH) {
                 $unitsBooked='';
             }
             $slots[] = [
