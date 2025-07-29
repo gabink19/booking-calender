@@ -4,6 +4,14 @@ document.querySelectorAll('.tanggal-btn').forEach(btn => {
     document.querySelectorAll('.tanggal-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     const date = btn.getAttribute('data-date');
+    // Tampilkan loading SweetAlert2
+    Swal.fire({
+      title: 'Memuat data...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
     // AJAX ambil slot
     fetch(`booking/slots?date=${encodeURIComponent(date)}`)
       .then(res => res.json())
@@ -19,6 +27,10 @@ document.querySelectorAll('.tanggal-btn').forEach(btn => {
             openBookingModal({ date, hour, hourVal });
           });
         });
+        Swal.close(); // Tutup loading setelah selesai
+      })
+      .catch(() => {
+        Swal.fire('Gagal', 'Gagal memuat data. Silakan coba lagi.', 'error');
       });
   });
 });
