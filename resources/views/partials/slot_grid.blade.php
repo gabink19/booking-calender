@@ -14,7 +14,7 @@
     @endphp
     <button class="slot {{ $slotClass }}" data-hour="{{ $slot['label'] }}" data-date="{{ $slot['date'] }}" data-hourVal="{{ $slot['hour'] }}" {{ $disabled }}>
       {{ $slot['label'] }}<br>
-      <span>{{ $slot['status'] }}</span>
+      <span>{!! $slot['status'] . $slot['units'] !!}</span>
     </button>
   @endforeach
 </div>

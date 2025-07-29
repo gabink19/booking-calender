@@ -172,23 +172,37 @@ class BookingController extends Controller
     // Helper: Dapatkan slot waktu per hari
     private function getSlots($selectedDate = null)
     {
-        $newDateFormat = Carbon::parse($selectedDate)->format('Y-m-d');
-        $date = $newDateFormat ?? Carbon::today()->toDateString();
+        $date = $selectedDate ? Carbon::parse($selectedDate)->format('Y-m-d') : Carbon::today()->toDateString();
+
+        // Ambil semua booking pada tanggal tsb (jam & unit)
+        $booked = Booking::where('date', $date)
+            ->where('status', 'active')
+            ->get(['hour', 'unit']);
+
+        // Buat array jam => [unit1, unit2, ...]
+        $bookedHours = [];
+        foreach ($booked as $b) {
+            $bookedHours[$b->hour][] = $b->unit;
+        }
+
         $slots = [];
+        $unit = session('unit');
         for ($h = 6; $h < 22; $h++) {
-            // Cek status booking di database
-            $isBooked = Booking::where('date', $date)
-                ->where('hour', $h)
-                ->where('status', 'active')
-                ->exists();
-
+            $isBooked = isset($bookedHours[$h]);
             $status = $isBooked ? 'Dipesan' : 'Tersedia';
-
+            $unitsBooked = $isBooked ? implode(', ', $bookedHours[$h]) : '';
+            if ($status=='Dipesan') {
+                $unitsBooked = ' <br> '.$unitsBooked;
+            }
+            if ($unit==$unitsBooked) {
+                $unitsBooked='';
+            }
             $slots[] = [
                 'date' => $date,
                 'hour' => $h,
                 'label' => sprintf('%02d:00 - %02d:59', $h, $h),
                 'status' => $status,
+                'units' => $unitsBooked, // Tambahan: daftar unit yang booking slot ini
             ];
         }
         return $slots;
