@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login Pengguna - Apartemen Bona Vista</title>
+  <title>Login Admin - Apartemen Bona Vista</title>
   <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ time() }}">
   <!-- SweetAlert2 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -16,15 +16,15 @@
       </div>
       <div>
         <h1 class="title" style="margin:0;font-size:1.5em;line-height:1.2;text-align:center;">
-          <span>Login</span><br /><span>Pengguna</span>
+          <span>Login</span><br /><span>Admin</span>
         </h1>
         <div class="subtitle" style="font-size:1em;color:#6366f1;margin-top:2px;text-align:center;">Apartemen Bona Vista</div>
       </div>
     </div>
-    <div class="desc" style="text-align:center;">Silakan login untuk memesan lapangan</div>
+    <div class="desc" style="text-align:center;">Silakan login untuk monitoring pesanan lapangan</div>
     <form id="loginForm" method="POST" action="{{ route('login.submit') }}" autocomplete="off">
       @csrf
-      <label for="username" class="form-label">ID Pengguna:</label>
+      <label for="username" class="form-label">ID Admin:</label>
       <input type="text" id="username" name="username"  class="form-input" required/>
       <label for="password" class="form-label">Password</label>
       <input type="password" id="password" name="password" class="form-input" required/>
@@ -54,7 +54,7 @@
         Swal.fire({
           icon: 'warning',
           title: 'Lengkapi Data',
-          text: 'ID Pengguna dan password wajib diisi.',
+          text: 'ID Admin dan password wajib diisi.',
           confirmButtonColor: '#6366f1'
         });
       }

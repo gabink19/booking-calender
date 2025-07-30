@@ -1,0 +1,150 @@
+@extends('admin.layouts.app')
+
+@section('content')
+<div class="card today-booking">
+    <h2>Seluruh Data Booking</h2>
+    <div class="table-responsive">
+        <table id="bookingTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Jam</th>
+                    <th>Nama</th>
+                    <th>No. Unit</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="booking-today-body">
+                @if(isset($bookings) && count($bookings))
+                    @foreach($bookings as $booking)
+                        <tr data-id="{{ $booking->id }}">
+                            <td></td> <!-- Nomor otomatis oleh DataTables -->
+                            <td>{{ $booking->date }}</td>
+                            <td>{{ $booking->hour }}</td>
+                            <td>{{ $booking->name }}</td>
+                            <td>{{ $booking->unit }}</td>
+                            <td>
+                                @php
+                                    $bookingDateTime = \Carbon\Carbon::parse($booking->date . ' ' . $booking->hour.':59');
+                                @endphp
+                                @if($booking->status === 'active')
+                                    @if($bookingDateTime->lt(now()))
+                                        <span class="label label-grey">Terlewat</span>
+                                    @else
+                                        <span class="label label-green">Aktif</span>
+                                    @endif
+                                @elseif($booking->status === 'cancelled')
+                                    <span class="label label-red">Dibatalkan</span>
+                                @else
+                                    <span class="label label-default">{{ ucfirst($booking->status) }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="actions">
+                                    @if($booking->status === 'active' && !$bookingDateTime->lt(now()))
+                                        <button class="action-btn cancel" title="Batalkan" style="margin-left:4px;">
+                                            <span class="material-icons" style="vertical-align:middle;">cancel</span>
+                                            <span class="d-none d-md-inline">Batalkan</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="7" class="text-center">Tidak ada booking hari ini.</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+
+@push('head')
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
+<style>
+    #bookingTable thead th {
+        background: #3041b7 !important;
+        color: #fff !important;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<!-- jQuery dan DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        var t = $('#bookingTable').DataTable({
+            "language": {
+                "search": "Cari:",
+                "lengthMenu": "Tampilkan _MENU_ data",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "paginate": {
+                    "first": "Pertama",
+                    "last": "Terakhir",
+                    "next": "Berikutnya",
+                    "previous": "Sebelumnya"
+                },
+                "zeroRecords": "Tidak ada data ditemukan",
+            },
+            "columnDefs": [
+                { "orderable": false, "searchable": false, "targets": 0 }
+            ],
+            "order": [[1, 'desc']]
+        });
+
+        // Nomor otomatis pada kolom pertama
+        t.on('order.dt search.dt', function () {
+            t.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
+                cell.innerHTML = i + 1;
+            });
+        }).draw();
+
+        // SweetAlert konfirmasi batalkan booking
+        $('#bookingTable').on('click', '.action-btn.cancel', function(e) {
+            e.preventDefault();
+            var $tr = $(this).closest('tr');
+            // Pastikan ada data-id booking di <tr>
+            var bookingId = $tr.data('id') || $tr.attr('data-id');
+            if (!bookingId) {
+                Swal.fire('Error', 'ID booking tidak ditemukan.', 'error');
+                return;
+            }
+            Swal.fire({
+                title: 'Batalkan Booking?',
+                text: "Apakah Anda yakin ingin membatalkan booking ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Batalkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('/admin/booking/cancel') }}/" + bookingId,
+                        method: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(res) {
+                            Swal.fire('Berhasil', 'Booking berhasil dibatalkan!', 'success').then(() => {
+                                location.reload();
+                            });
+                        },
+                        error: function() {
+                            Swal.fire('Gagal', 'Terjadi kesalahan saat membatalkan booking.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+@endpush

@@ -8,6 +8,11 @@ class User extends Authenticatable
 {
     protected $table = 'users';
 
+    // Tambahkan ini agar primaryKey menggunakan uuid
+    protected $primaryKey = 'uuid';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'name',
         'username',

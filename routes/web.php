@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +23,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Route register
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 
 // Group booking routes dengan middleware auth session
 Route::middleware('auth.session')->group(function () {
@@ -36,4 +36,22 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/booking/slots', [BookingController::class, 'ajaxSlots'])->name('booking.slots');
     Route::get('/mybooking', [BookingController::class, 'history'])->name('mybooking');
     Route::get('/profil', [BookingController::class, 'profil'])->name('profil');
+});
+
+
+// Route login admin
+Route::get('/admin/login', [AuthController::class, 'showLoginAdminForm'])->name('admin.login');
+Route::middleware('auth.session.admin')->group(function () {
+    Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', function () {
+        return redirect()->route('admin.dashboard');
+    });
+    Route::get('/admin/booking', [AdminController::class, 'bookingIndex'])->name('admin.booking.index');
+    Route::post('/admin/booking/cancel/{id}', [BookingController::class, 'cancel'])->name('admin.booking.cancel');
+    Route::get('/admin/user', [AdminController::class, 'userIndex'])->name('admin.user.index');
+    Route::get('/admin/profile', [AdminController::class, 'profile'])->name('admin.profile');
+    Route::post('/admin/register', [AuthController::class, 'register'])->name('admin.user.create');
+    Route::get('/admin/user/{uuid}', [AuthController::class, 'getUser'])->name('admin.user.get');
+    Route::post('/admin/user/{uuid}/edit', [AuthController::class, 'editUser'])->name('admin.user.edit');
+    Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
