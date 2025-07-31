@@ -2,7 +2,13 @@
 
 @section('content')
 <div class="card today-booking">
-    <h2>Seluruh Data Booking</h2>
+    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+        Seluruh Data Booking
+        <button id="btn-tambah-booking" class="action-btn primary" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span class="material-icons" style="vertical-align:middle;">add_circle</span>
+            <span class="d-none d-md-inline">Jadwalkan Pemeliharaan</span>
+        </button>
+    </h2>
     <div class="table-responsive">
         <table id="bookingTable" class="display" style="width:100%">
             <thead>
@@ -24,7 +30,11 @@
                             <td>{{ $booking->date }}</td>
                             <td>{{ $booking->hour }}</td>
                             <td>{{ $booking->name }}</td>
-                            <td>{{ $booking->unit }}</td>
+                            @if($booking->is_admin)
+                                <td> Pemeliharaan </td>
+                            @else
+                                <td>{{ $booking->unit }}</td>
+                            @endif
                             <td>
                                 @php
                                     $bookingDateTime = \Carbon\Carbon::parse($booking->date . ' ' . $booking->hour.':59');
@@ -67,10 +77,29 @@
 @push('head')
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
     #bookingTable thead th {
         background: #3041b7 !important;
         color: #fff !important;
+    }
+    .action-btn.primary {
+        background: linear-gradient(90deg, #5c7cff 60%, #91e0fd 100%);
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        box-shadow: 0 1px 4px rgba(60,80,180,0.07);
+        text-decoration: none !important;
+        min-width: 0;
+    }
+    .action-btn.primary:hover, .action-btn.primary:focus {
+        filter: brightness(0.97);
+        box-shadow: 0 2px 8px rgba(60,80,180,0.13);
     }
 </style>
 @endpush
@@ -82,31 +111,34 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
-        var t = $('#bookingTable').DataTable({
-            "language": {
-                "search": "Cari:",
-                "lengthMenu": "Tampilkan _MENU_ data",
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                "paginate": {
-                    "first": "Pertama",
-                    "last": "Terakhir",
-                    "next": "Berikutnya",
-                    "previous": "Sebelumnya"
+        var rowCount = $('#bookingTable tbody tr[data-id]').length;
+        if (rowCount > 0) {
+            var t = $('#bookingTable').DataTable({
+                "language": {
+                    "search": "Cari:",
+                    "lengthMenu": "Tampilkan _MENU_ data",
+                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Berikutnya",
+                        "previous": "Sebelumnya"
+                    },
+                    "zeroRecords": "Tidak ada data ditemukan",
                 },
-                "zeroRecords": "Tidak ada data ditemukan",
-            },
-            "columnDefs": [
-                { "orderable": false, "searchable": false, "targets": 0 }
-            ],
-            "order": [[1, 'desc']]
-        });
-
-        // Nomor otomatis pada kolom pertama
-        t.on('order.dt search.dt', function () {
-            t.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
-                cell.innerHTML = i + 1;
+                "columnDefs": [
+                    { "orderable": false, "searchable": false, "targets": 0 }
+                ],
+                "order": [[1, 'desc']]
             });
-        }).draw();
+
+            // Nomor otomatis pada kolom pertama
+            t.on('order.dt search.dt', function () {
+                t.column(0, {search:'applied', order:'applied'}).nodes().each(function (cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).draw();
+        }
 
         // SweetAlert konfirmasi batalkan booking
         $('#bookingTable').on('click', '.action-btn.cancel', function(e) {
@@ -143,6 +175,28 @@
                         }
                     });
                 }
+            });
+        });
+
+        // Modal SweetAlert2 untuk tambah booking
+        $('#btn-tambah-booking').on('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Jadwalkan Pemeliharaan',
+                html:
+                    `<div style="overflow:auto;max-height:430px;">
+                        <iframe src="{{ route('admin.booking.inframe') }}" width="100%" height="400" frameborder="0" style="display:block;border:0;"></iframe>
+                    </div>`,
+                customClass: {
+                    popup: 'swal2-modal-custom-height'
+                },
+                focusConfirm: false,
+                showCancelButton: false,
+                showConfirmButton: false,
+                didClose: () => {
+                    location.reload();
+                }
+                // Hanya tombol close (X) di pojok kanan atas
             });
         });
     });

@@ -25,3 +25,17 @@ ALTER TABLE users
 ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users
 ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;
+
+CREATE TABLE IF NOT EXISTS settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    key_name VARCHAR(64) NOT NULL UNIQUE,
+    value TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT NULL
+);
+
+INSERT INTO settings (key_name, value) VALUES
+    ('app_name', 'Booking App'),
+    ('app_logo', 'logo.jpg'),
+    ('app_background', 'background.png'),
+    ('contact', '0812-1234-5678');

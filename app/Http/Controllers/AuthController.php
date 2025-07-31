@@ -148,4 +148,18 @@ class AuthController extends Controller
         // Jika bukan AJAX, bisa redirect atau tampilkan view detail user
         return view('admin.user-detail', compact('user'));
     }
+
+    public function forceUpdate()
+    {
+        $users = \App\Models\User::where('is_admin', false)->get();
+        foreach ($users as $user) {
+            if (substr($user->whatsapp, 0, 1) === '8') {
+                $user->whatsapp = '0' . $user->whatsapp;
+            }
+            $user->whatsapp = str_replace('-', '', $user->whatsapp);
+            $user->password = password_hash($user->unit, PASSWORD_DEFAULT);
+            $user->save();
+        }
+        return response()->json(['success' => true, 'message' => 'Pengguna berhasil diupdate!']);
+    }
 }

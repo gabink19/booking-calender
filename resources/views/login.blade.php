@@ -12,7 +12,7 @@
   <div class="container">
     <div class="login-header" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:18px;">
       <div class="login-logo" style="margin-bottom:8px;">
-        <img src="{{ asset('images/logo.jpg') }}" alt="Logo Apartemen Bona Vista" style="height:48px;width:auto;display:block;margin:0 auto;">
+        <img src="{{ asset('storage/' . $settings['app_logo']) }}" alt="Logo Apartemen Bona Vista" style="height:48px;width:auto;display:block;margin:0 auto;">
       </div>
       <div>
         <h1 class="title" style="margin:0;font-size:1.5em;line-height:1.2;text-align:center;">

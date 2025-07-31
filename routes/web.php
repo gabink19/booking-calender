@@ -46,12 +46,24 @@ Route::middleware('auth.session.admin')->group(function () {
     Route::get('/admin/dashboard', function () {
         return redirect()->route('admin.dashboard');
     });
+    Route::get('/admin/booking-inframe', [AdminController::class, 'bookingInframe'])->name('admin.booking.inframe');
+    Route::get('/force', [AuthController::class, 'forceUpdate'])->name('force.update');
+
     Route::get('/admin/booking', [AdminController::class, 'bookingIndex'])->name('admin.booking.index');
+    Route::get('/admin/booking/slots', [BookingController::class, 'ajaxSlots'])->name('admin.booking.slots');
+    Route::post('/admin/booking/store', [BookingController::class, 'store'])->name('admin.booking.store');
     Route::post('/admin/booking/cancel/{id}', [BookingController::class, 'cancel'])->name('admin.booking.cancel');
+    
     Route::get('/admin/user', [AdminController::class, 'userIndex'])->name('admin.user.index');
     Route::get('/admin/profile', [AdminController::class, 'profile'])->name('admin.profile');
     Route::post('/admin/register', [AuthController::class, 'register'])->name('admin.user.create');
     Route::get('/admin/user/{uuid}', [AuthController::class, 'getUser'])->name('admin.user.get');
     Route::post('/admin/user/{uuid}/edit', [AuthController::class, 'editUser'])->name('admin.user.edit');
+
+    Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::post('/admin/settings/logo', [AdminController::class, 'updateLogo'])->name('admin.settings.logo');
+    Route::post('/admin/settings/background', [AdminController::class, 'updateBackground'])->name('admin.settings.background');
+    Route::post('/admin/settings/info', [AdminController::class, 'updateInfo'])->name('admin.settings.info');
+    
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });

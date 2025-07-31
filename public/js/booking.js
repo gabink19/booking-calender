@@ -53,11 +53,19 @@ slotBtns.forEach(slot => {
 // Fungsi modal SweetAlert2 booking
 function openBookingModal({date, hour, hourVal}) {
     // Ambil data user dari localStorage
-    let user = { name: '', unit: '', whatsapp: '' };
+    let user = { name: '', unit: '', whatsapp: '' , is_admin: ''};
     try {
         user = JSON.parse(localStorage.getItem('user')) || user;
     } catch (e) {}
 
+    let aktifitas = 'No. Unit'
+    let style = ''
+    let unit = user.unit
+    if (user.is_admin=="1") {
+      aktifitas = 'Aktifitas'
+      unit = 'Pemeliharaan'
+      style = 'style="display:none;"'
+    }
     Swal.fire({
     title: 'Pesan Lapangan',
     html: `
@@ -120,19 +128,19 @@ function openBookingModal({date, hour, hourVal}) {
             </div>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row" ${style}>
           <label>Nama :</label>
           <div style="flex:1;">
             <input type="text" id="modal-name" value="${user.name || ''}" disabled>
           </div>
         </div>
         <div class="form-row">
-          <label>No. Unit :</label>
+          <label>${aktifitas} :</label>
           <div style="flex:1;">
-            <input type="text" id="modal-unit" value="${user.unit || ''}" disabled>
+            <input type="text" id="modal-unit" value="${unit || ''}" disabled>
           </div>
         </div>
-        <div class="form-row">
+        <div class="form-row" ${style}>
           <label>WhatsApp :</label>
           <div style="flex:1;">
             <input type="text" id="modal-whatsapp" value="${user.whatsapp || ''}" disabled>
@@ -153,7 +161,6 @@ function openBookingModal({date, hour, hourVal}) {
                 if (this.checked) {
                     document.getElementById('modal-hour-end').value = '';
                     document.getElementById('modal-hour-end-display').style.display = 'none';
-                    document.getElementById('sampai-label').style.display = 'none';
                 }
             });
             document.getElementById('duration2').addEventListener('change', function() {
@@ -162,12 +169,10 @@ function openBookingModal({date, hour, hourVal}) {
                     if (jam === 23) {
                         document.getElementById('modal-hour-end').value = '';
                         document.getElementById('modal-hour-end-display').style.display = 'none';
-                        document.getElementById('sampai-label').style.display = 'none';
                     } else {
                         document.getElementById('modal-hour-end').value = (jam+1).toString().padStart(2,'0');
                         document.getElementById('modal-hour-end-display').value = (jam+1).toString().padStart(2,'0') + ':00 - '+(jam+1).toString().padStart(2,'0') + ':59';
                         document.getElementById('modal-hour-end-display').style.display = '';
-                        document.getElementById('sampai-label').style.display = '';
                     }
                 }
             });
@@ -188,15 +193,13 @@ function openBookingModal({date, hour, hourVal}) {
                 const jam = parseInt(hourVal, 10);
                 hourEnd = (jam + 1);
             }
-            // Simpan ke localStorage
-            localStorage.setItem('user', JSON.stringify({ name, unit, whatsapp }));
             return { 
                 date, 
                 hour: parseInt(hourVal, 10),
                 hourEnd: parseInt(hourEnd, 10),
                 name,
-                unit, 
-                whatsapp,
+                unit: user.unit,
+                whatsapp: user.whatsapp,
                 durationRadio,
                 _token: csrfToken
             };
@@ -204,8 +207,12 @@ function openBookingModal({date, hour, hourVal}) {
     }).then((result) => {
         // window.scrollTo(0, 0);
         if (result.isConfirmed && result.value) {
+          let UrlParam = ""
+          if (user.is_admin) {
+              UrlParam="/store"
+          }
             // AJAX POST ke route booking.store
-            fetch('booking', {
+            fetch('booking'+UrlParam, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

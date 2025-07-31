@@ -1,6 +1,6 @@
 <nav class="sidebar" id="sidebar">
     <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-        <img src="{{ asset('images/logo.jpg') }}" alt="Logo" style="width:48px; height:48px; object-fit:contain;"/>
+        <img src="{{ asset('storage/' . $settings['app_logo']) }}" alt="Logo" style="width:48px; height:48px; object-fit:contain;"/>
         <span style="font-size:1.1rem;">Apartemen Bona Vista</span>
         <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle Sidebar" style="margin-left:auto;display:none;">
             <span class="material-icons">menu</span>
@@ -15,6 +15,9 @@
         </a>
         <a href="{{ route('admin.user.index') }}">
             <li class="{{ request()->is('admin/user*') ? 'active' : '' }}">Manajemen User</li>
+        </a>
+        <a href="{{ route('admin.settings') }}">
+            <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">Pengaturan</li>
         </a>
         <a href="{{ route('admin.logout') }}">
             <li>Logout</li>

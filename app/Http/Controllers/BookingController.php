@@ -5,33 +5,36 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\BookingWhatsappNotification;
+use App\Events\BookingEvent;
+
+use function Psy\debug;
 
 class BookingController extends Controller
 {
     // Tampilkan halaman booking
     public function index(Request $request)
     {
-        $wa = '0812-1234-5678'; // Nomor admin
         $dates = $this->getWeekDates();
         $selectedDate = $request->input('date', $dates[0]);
         $slots = $this->getSlots();
         $userId = session('user_id');
-        $user = User::select('name', 'unit', 'whatsapp')->where('uuid', $userId)->first();
-
+        $user = User::select('name', 'unit', 'whatsapp', 'is_admin')->where('uuid', $userId)->first();
         // Simpan data ke localStorage via JavaScript
         echo "<script>
             localStorage.setItem('user', JSON.stringify({
                 name: " . json_encode($user->name) . ",
                 unit: " . json_encode($user->unit) . ",
-                whatsapp: " . json_encode($user->whatsapp) . "
+                whatsapp: " . json_encode($user->whatsapp) . ",
+                is_admin: " . json_encode($user->is_admin) . "
             }));
         </script>";
 
-        return view('booking', compact('wa', 'dates', 'selectedDate', 'slots'));
+        return view('booking', compact('dates', 'selectedDate', 'slots'));
     }
 
     // Proses booking
@@ -59,28 +62,30 @@ class BookingController extends Controller
         if ($existing>0) {
             return response()->json(['error' => 'Slot pada tanggal dan jam tersebut sudah dipesan!']);
         }
-        $nowBookCount = 1;
-        if ($request->hourEnd!=null) {
-            $nowBookCount++;
-        }
-        // Cek booking per hari maksimal 2 jam untuk unit yang sama
-        $unitDayBookings = Booking::where('unit', $request->unit)
-            ->where('date', $newDateFormat)
-            ->where('status', 'active')
-            ->count();
-        if ($unitDayBookings+$nowBookCount > 2) {
-            return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
-        }
+        if(!Session::has('is_admin')){
+            $nowBookCount = 1;
+            if ($request->hourEnd!=null) {
+                $nowBookCount++;
+            }
+            // Cek booking per hari maksimal 2 jam untuk unit yang sama
+            $unitDayBookings = Booking::where('unit', $request->unit)
+                ->where('date', $newDateFormat)
+                ->where('status', 'active')
+                ->count();
+            if ($unitDayBookings+$nowBookCount > 2) {
+                return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
+            }
 
-        // Cek booking per minggu maksimal 4 jam untuk unit yang sama
-        $startOfWeek = Carbon::parse($newDateFormat)->startOfWeek(Carbon::MONDAY)->toDateString();
-        $endOfWeek = Carbon::parse($newDateFormat)->endOfWeek(Carbon::SUNDAY)->toDateString();
-        $unitWeekBookings = Booking::where('unit', $request->unit)
-            ->whereBetween('date', [$startOfWeek, $endOfWeek])
-            ->where('status', 'active')
-            ->count();
-        if ($unitWeekBookings >= 4) {
-            return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
+            // Cek booking per minggu maksimal 4 jam untuk unit yang sama
+            $startOfWeek = Carbon::parse($newDateFormat)->startOfWeek(Carbon::MONDAY)->toDateString();
+            $endOfWeek = Carbon::parse($newDateFormat)->endOfWeek(Carbon::SUNDAY)->toDateString();
+            $unitWeekBookings = Booking::where('unit', $request->unit)
+                ->whereBetween('date', [$startOfWeek, $endOfWeek])
+                ->where('status', 'active')
+                ->count();
+            if ($unitWeekBookings >= 4) {
+                return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
+            }
         }
         $unit = session('unit');
         if ($unit) {
@@ -107,7 +112,8 @@ class BookingController extends Controller
         // Kirim notifikasi WhatsApp (gunakan Notification atau API eksternal)
         // Notification::route('whatsapp', $booking->whatsapp)
         //     ->notify(new BookingWhatsappNotification($booking));
-
+        // event(new BookingEvent("newBooking"));
+        broadcast(new BookingEvent("newBooking"))->toOthers();
         return response()->json(['success' => true, 'message' => 'Booking berhasil!']);
     }
 
@@ -126,6 +132,7 @@ class BookingController extends Controller
         $booking->status = 'cancelled';
         $booking->updated_at = now();
         $booking->save();
+        broadcast(new BookingEvent("newBooking"))->toOthers();
         return response()->json([
             'success' => true,
             'message' => 'Pemesanan berhasil dibatalkan.'
@@ -155,7 +162,12 @@ class BookingController extends Controller
     }
 
     // Helper: Dapatkan tanggal minggu ini (Senin-Minggu)
-    private function getWeekDates()
+    /**
+     * Get an array of dates for the current week starting from today.
+     *
+     * @return array
+     */
+    public function getWeekDates()
     {
         $mulai = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $tanggal = [];
@@ -170,7 +182,12 @@ class BookingController extends Controller
     }
 
     // Helper: Dapatkan slot waktu per hari
-    private function getSlots($selectedDate = null)
+    /**
+     * Get an array of dates for the current week starting from today.
+     *
+     * @return array
+     */
+    public function getSlots($selectedDate = null)
     {
         $date = $selectedDate ? Carbon::parse($selectedDate)->format('Y-m-d') : Carbon::today()->toDateString();
 
@@ -200,6 +217,10 @@ class BookingController extends Controller
             }
             if ($unit==$unitsBookedH) {
                 $unitsBooked='';
+            }
+            if ($isBooked && $bookedHours[$h]) {
+                $unitData = User::where('unit', $bookedHours[$h])->first();
+                $unitsBooked = $unitData->is_admin ? 'Pemeliharaan' : $unitsBooked;
             }
             $slots[] = [
                 'date' => $date,

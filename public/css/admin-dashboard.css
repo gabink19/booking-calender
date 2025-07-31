@@ -423,3 +423,7 @@ td {
     text-align: center !important;
   }
 }
+.swal2-modal-custom-height {
+    min-height: 540px !important;
+    max-height: 540px !important;
+}

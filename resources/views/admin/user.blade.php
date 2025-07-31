@@ -47,12 +47,14 @@
                                 @endif
                             </td>
                             <td>
+                                @if(!$user->is_admin)
                                 <div class="actions">
                                     <button class="action-btn detail" title="Edit User">
                                         <span class="material-icons" style="vertical-align:middle;">edit</span>
                                         <span class="d-none d-md-inline">Edit</span>
                                     </button>
                                 </div>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -162,8 +164,6 @@
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
                             <label for="role" style="width:110px;text-align:right;margin-right:10px;">Role</label>
                             <select id="role" class="swal2-input" style="width:64%;height:40px;padding:0.75em;font-size:1em;margin-top: 10px;margin-left: 4%;">
-                                <option value="">Pilih Role</option>
-                                <option value="1">Admin</option>
                                 <option value="0">Pengguna</option>
                             </select>
                         </div>

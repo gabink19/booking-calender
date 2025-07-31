@@ -9,7 +9,10 @@
   <!-- Tambahkan SweetAlert2 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
-<body>
+@php
+  $backgroundImage = asset('storage/' . ($settings['app_background'] ?? 'default-background.png'));
+@endphp
+<body style="background: #fff url('{{ $backgroundImage }}') no-repeat center center fixed; background-size: cover;">
   <div class="container">
     <div class="header">
       <h1>Riwayat Pemesanan Lapangan Tenis</h1>
