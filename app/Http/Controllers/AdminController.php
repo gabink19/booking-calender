@@ -83,7 +83,7 @@ class AdminController extends Controller
             localStorage.setItem('user', JSON.stringify({
                 name: " . json_encode($user->name) . ",
                 unit: " . json_encode($user->unit) . ",
-                is_admin: " . json_encode($user->is_admin) . ",
+                is_admin: " . $user->is_admin . ",
                 whatsapp: " . json_encode($user->whatsapp) . "
             }));
         </script>";
