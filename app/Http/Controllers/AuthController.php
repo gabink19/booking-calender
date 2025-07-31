@@ -125,6 +125,27 @@ class AuthController extends Controller
         return redirect()->back()->with('success', 'Pengguna berhasil diupdate!');
     }
 
+    public function changePass(Request $request, $uuid)
+    {
+        $request->validate([
+            'old_password' => 'required|string',
+            'new_password' => 'required|string',
+        ]);
+        $user = User::where('uuid', $request->uuid)->firstOrFail();
+        if ($user && !password_verify($request->old_password, $user->password)) {
+            return response()->json(['success' => false, 'message' => 'Password lama salah!']);
+        }
+        $user->password = password_hash($request->new_password, PASSWORD_DEFAULT);
+
+        $user->save();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Password berhasil diubah!']);
+        }
+
+        return redirect()->back()->with('success', 'Password berhasil diubah!');
+    }
+
     public function getUser($uuid)
     {
         $user = \App\Models\User::where('uuid', $uuid)->firstOrFail();

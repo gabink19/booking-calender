@@ -258,7 +258,7 @@ class BookingController extends Controller
     public function profil()
     {
         $userId = session('user_id');
-        $user = User::select('username','name', 'unit', 'whatsapp','created_at')->where('uuid', $userId)->first();
+        $user = User::select('uuid','username','name', 'unit', 'whatsapp','created_at')->where('uuid', $userId)->first();
         return view('profil', compact('user'));
     }
 }

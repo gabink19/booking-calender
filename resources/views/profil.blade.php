@@ -49,6 +49,11 @@
           </tr>
       </table>
     </div>
+    <div style="text-align:center;margin-bottom:32px;">
+      <button id="ubah-password-btn" style="background:#3e76e5;color:#fff;padding:10px 28px;border:none;border-radius:6px;font-size:16px;font-weight:500;cursor:pointer;box-shadow:0 1px 4px #0001;transition:background 0.2s;">
+        Ubah Password
+      </button>
+    </div>
     <form method="POST" action="{{ route('logout') }}" style="text-align:center;margin-bottom:32px;">
       @csrf
       <button type="submit" style="background:#e53e3e;color:#fff;padding:10px 28px;border:none;border-radius:6px;font-size:16px;font-weight:500;cursor:pointer;box-shadow:0 1px 4px #0001;transition:background 0.2s;">
@@ -63,6 +68,60 @@
         const todayStr = today.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
         const btn = Array.from(document.querySelectorAll('.tanggal-btn')).find(b => b.dataset.date === todayStr);
         if (btn) btn.click();
+      });
+
+      document.querySelector('#ubah-password-btn').addEventListener('click', function(e) {
+          e.preventDefault();
+          Swal.fire({
+              title: 'Ubah Password',
+              html:
+                  `<form id="form-ubah-password" autocomplete="off">
+                      <input type="password" id="old_password" class="swal2-input" placeholder="Password Lama" required>
+                      <input type="password" id="new_password" class="swal2-input" placeholder="Password Baru" required>
+                      <input type="password" id="confirm_password" class="swal2-input" placeholder="Konfirmasi Password Baru" required>
+                  </form>`,
+              focusConfirm: false,
+              showCancelButton: true,
+              confirmButtonText: 'Simpan',
+              cancelButtonText: 'Batal',
+              preConfirm: () => {
+                  const old_password = document.getElementById('old_password').value;
+                  const new_password = document.getElementById('new_password').value;
+                  const confirm_password = document.getElementById('confirm_password').value;
+                  if (!old_password || !new_password || !confirm_password) {
+                      Swal.showValidationMessage('Semua field wajib diisi!');
+                      return false;
+                  }
+                  if (new_password !== confirm_password) {
+                      Swal.showValidationMessage('Konfirmasi password tidak cocok!');
+                      return false;
+                  }
+                  return { old_password, new_password, confirm_password };
+              }
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  // Kirim AJAX ke route ubah password (ganti sesuai route Anda)
+                  $.ajax({
+                      url: "{{ url('/update-password', ['uuid' => $user->uuid]) }}",
+                      method: "POST",
+                      contentType: "application/json",
+                      headers: {
+                          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                      },
+                      data: JSON.stringify(result.value),
+                      success: function(res) {
+                          if (res.success) {
+                              Swal.fire('Berhasil', res.message, 'success');
+                          } else {
+                              Swal.fire('Gagal', res.message || 'Gagal mengubah password', 'error');
+                          }
+                      },
+                      error: function() {
+                          Swal.fire('Gagal', 'Terjadi kesalahan server', 'error');
+                      }
+                  });
+              }
+          });
       });
     </script>
   </div>
@@ -91,6 +150,7 @@
   </nav>
   <!-- Tambahkan SweetAlert2 JS sebelum booking.js -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="{{ asset('js/booking.js') }}?v={{ time() }}"></script>
 </body>
 </html>

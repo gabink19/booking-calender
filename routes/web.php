@@ -36,6 +36,7 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/booking/slots', [BookingController::class, 'ajaxSlots'])->name('booking.slots');
     Route::get('/mybooking', [BookingController::class, 'history'])->name('mybooking');
     Route::get('/profil', [BookingController::class, 'profil'])->name('profil');
+    Route::post('/update-password/{uuid}', [AuthController::class, 'changePass'])->name('update.password');
 });
 
 
@@ -64,6 +65,6 @@ Route::middleware('auth.session.admin')->group(function () {
     Route::post('/admin/settings/logo', [AdminController::class, 'updateLogo'])->name('admin.settings.logo');
     Route::post('/admin/settings/background', [AdminController::class, 'updateBackground'])->name('admin.settings.background');
     Route::post('/admin/settings/info', [AdminController::class, 'updateInfo'])->name('admin.settings.info');
-    
+
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
