@@ -30,7 +30,7 @@ class BookingController extends Controller
                 name: " . json_encode($user->name) . ",
                 unit: " . json_encode($user->unit) . ",
                 whatsapp: " . json_encode($user->whatsapp) . ",
-                is_admin: " . json_encode($user->is_admin) . "
+                is_admin: " . $user->is_admin . "
             }));
         </script>";
 
