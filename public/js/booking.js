@@ -208,6 +208,9 @@ function openBookingModal({date, hour, hourVal}) {
         // window.scrollTo(0, 0);
         if (result.isConfirmed && result.value) {
           let UrlParam = ""
+          if (typeof user.is_admin === "string") {
+            user.is_admin = parseInt(user.is_admin, 10) || 0;
+          }
           if (user.is_admin) {
               UrlParam="/store"
           }
