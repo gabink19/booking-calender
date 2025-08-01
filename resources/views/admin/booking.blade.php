@@ -28,7 +28,7 @@
                         <tr data-id="{{ $booking->id }}">
                             <td></td> <!-- Nomor otomatis oleh DataTables -->
                             <td>{{ $booking->date }}</td>
-                            <td>{{ $booking->hour }}</td>
+                            <td>{{ $booking->hour < 10 ? '0' . $booking->hour : $booking->hour }}:00</td>
                             <td>{{ $booking->name }}</td>
                             @if($booking->is_admin)
                                 <td> Pemeliharaan </td>

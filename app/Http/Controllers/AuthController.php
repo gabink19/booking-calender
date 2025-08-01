@@ -28,13 +28,17 @@ class AuthController extends Controller
             ]);
 
             $user = User::where('username', $request->username)->first();
-            if ($user && password_verify($request->password, $user->password) && !$user->is_admin) {
+            if ($user && password_verify($request->password, $user->password)) {
                 // Tambahkan pengecekan status aktif
                 if (!$user->is_active) {
                     return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi admin.']);
                 }
                 Session::put('user_id', $user->uuid);
                 Session::put('unit', $user->unit);
+                if ($user->is_admin) {
+                    Session::put('is_admin', true);
+                    return redirect()->route('admin.dashboard');
+                }
                 return redirect()->route('booking');
             }
             return back()->withErrors(['login' => 'Username atau password salah']);
@@ -79,10 +83,6 @@ class AuthController extends Controller
 
     public function logout()
     {
-        if (Session::get('is_admin')) {
-            Session::flush();
-            return redirect()->route('admin.login');
-        }
         Session::flush();
         return redirect()->route('login');
     }
