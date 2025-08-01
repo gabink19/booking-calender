@@ -22,21 +22,18 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'username' => 'required|string',
-                'password' => 'required|string',
+                'username' => 'required',
+                'password' => 'required',
+                'captcha'  => 'required|captcha'
             ]);
 
             $user = User::where('username', $request->username)->first();
-            if ($user && password_verify($request->password, $user->password)) {
+            if ($user && password_verify($request->password, $user->password) && !$user->is_admin) {
                 // Tambahkan pengecekan status aktif
                 if (!$user->is_active) {
                     return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi admin.']);
                 }
                 Session::put('user_id', $user->uuid);
-                if ($user->is_admin) {
-                    Session::put('is_admin', true);
-                    return redirect()->route('admin.dashboard');
-                }
                 Session::put('unit', $user->unit);
                 return redirect()->route('booking');
             }
@@ -45,6 +42,32 @@ class AuthController extends Controller
             return back()->withErrors(['login' => 'Terjadi kesalahan. Silakan coba lagi nanti.']);
         }
     }
+
+    public function loginAdmin(Request $request)
+    {
+        try {
+            $request->validate([
+                'username' => 'required',
+                'password' => 'required',
+                'captcha'  => 'required|captcha'
+            ]);
+
+            $user = User::where('username', $request->username)->first();
+            if ($user && password_verify($request->password, $user->password) && $user->is_admin) {
+                // Tambahkan pengecekan status aktif
+                if (!$user->is_active) {
+                    return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi Developer.']);
+                }
+                Session::put('user_id', $user->uuid);
+                Session::put('is_admin', true);
+                return redirect()->route('admin.dashboard');
+            }
+            return back()->withErrors(['login' => 'Username atau password salah']);
+        } catch (\Exception $e) {
+            return back()->withErrors(['login' => 'Terjadi kesalahan. Silakan coba lagi nanti.']);
+        }
+    }
+
 
     public function logout()
     {

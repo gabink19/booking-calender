@@ -19,7 +19,7 @@
       <p>Apartemen Bona Vista</p>
       <div class="contact">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" class="phone-icon" viewBox="0 0 24 24" fill="none"><path d="M6.62 10.79a15.464 15.464 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1v3.5a1 1 0 01-1 1C7.61 22.5 1.5 16.39 1.5 8.5a1 1 0 011-1H6a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.21 1.11l-2.2 2.2z" fill="#fff"/></svg>
-        <span>A051 123 &nbsp; <a href="https://wa.me/62{{ preg_replace('/[^0-9]/', '', $settings['contact'] ?? '81212345678') }}" target="_blank" class="wa-link">{{ $settings['contact'] ?? '0812-1234-5678' }}</a></span>
+        <span>WhatsApp : &nbsp; <a href="https://wa.me/62{{ preg_replace('/[^0-9]/', '', $settings['contact'] ?? '81212345678') }}" target="_blank" class="wa-link">{{ $settings['contact'] ?? '0812-1234-5678' }}</a></span>
       </div>
     </div>
     @if(session('success'))

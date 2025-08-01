@@ -12,11 +12,11 @@
   <div class="container">
     <div class="login-header" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:18px;">
       <div class="login-logo" style="margin-bottom:8px;">
-        <img src="{{ asset('storage/' . $settings['app_logo']) }}" alt="Logo Apartemen Bona Vista" style="height:48px;width:auto;display:block;margin:0 auto;">
+        <img src="{{ asset('storage/' . $settings['app_logo']) }}" alt="Logo Apartemen Bona Vista" style="height:120px;width:auto;display:block;margin:0 auto;">
       </div>
       <div>
         <h1 class="title" style="margin:0;font-size:1.5em;line-height:1.2;text-align:center;">
-          <span>Login</span><br /><span>Pengguna</span>
+          <span>Halaman Login</span>
         </h1>
         <div class="subtitle" style="font-size:1em;color:#6366f1;margin-top:2px;text-align:center;">Apartemen Bona Vista</div>
       </div>
@@ -28,10 +28,39 @@
       <input type="text" id="username" name="username"  class="form-input" required/>
       <label for="password" class="form-label">Password</label>
       <input type="password" id="password" name="password" class="form-input" required/>
+
+      <label for="captcha" class="form-label">Captcha</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <img src="{{ captcha_src('flat') }}" alt="captcha" id="captcha-img" style="height:38px;">
+        <button type="button" onclick="refreshCaptcha()" style="padding:4px 10px;">⟳</button>
+      </div>
+      <input type="text" id="captcha" name="captcha" class="form-input" required placeholder="Masukkan hasil di atas"/>
       <button type="submit" class="btn-login">Login</button>
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Refresh captcha
+    function refreshCaptcha() {
+      document.getElementById('captcha-img').src = 'captcha/flat?' + Date.now();
+    }
+
+    // Validasi frontend sebelum submit
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const captcha = document.getElementById('captcha').value.trim();
+      if (!username || !password || !captcha) {
+        e.preventDefault();
+        Swal.fire({
+          icon: 'warning',
+          title: 'Lengkapi Data',
+          text: 'ID Pengguna, password, dan captcha wajib diisi.',
+          confirmButtonColor: '#6366f1'
+        });
+      }
+    });
+  </script>
 
   @if($errors->has('login'))
     <script>
@@ -43,22 +72,5 @@
       });
     </script>
   @endif
-
-  <script>
-    // Validasi frontend sebelum submit
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if (!username || !password) {
-        e.preventDefault();
-        Swal.fire({
-          icon: 'warning',
-          title: 'Lengkapi Data',
-          text: 'ID Pengguna dan password wajib diisi.',
-          confirmButtonColor: '#6366f1'
-        });
-      }
-    });
-  </script>
 </body>
 </html>

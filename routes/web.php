@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use Mews\Captcha\Captcha;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,7 @@ Route::middleware('auth.session')->group(function () {
 
 // Route login admin
 Route::get('/admin/login', [AuthController::class, 'showLoginAdminForm'])->name('admin.login');
+Route::post('/admin/login', [AuthController::class, 'loginAdmin'])->name('admin.login.submit');
 Route::middleware('auth.session.admin')->group(function () {
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin/dashboard', function () {
@@ -68,3 +70,7 @@ Route::middleware('auth.session.admin')->group(function () {
 
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
+
+// Route captcha
+Route::get('captcha/{config?}', [\Mews\Captcha\CaptchaController::class, 'getCaptcha'])->name('captcha');
+Route::get('admin/captcha/{config?}', [\Mews\Captcha\CaptchaController::class, 'getCaptcha'])->name('admin.captcha');
