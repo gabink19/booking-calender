@@ -78,6 +78,8 @@
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- DataTables Buttons CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css"/>
 <style>
     #bookingTable thead th {
         background: #3041b7 !important;
@@ -109,6 +111,13 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- DataTables Buttons JS -->
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script>
     $(document).ready(function() {
         var rowCount = $('#bookingTable tbody tr[data-id]').length;
@@ -129,7 +138,29 @@
                 "columnDefs": [
                     { "orderable": false, "searchable": false, "targets": 0 }
                 ],
-                "order": [[1, 'desc']]
+                "order": [[1, 'desc']],
+                "dom": 'Bfrtip',
+                "buttons": [
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Export Excel',
+                        className: 'action-btn primary',
+                        exportOptions: {
+                            columns: [1,2,3,4,5] // Kolom tanpa "Aksi"
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'Export PDF',
+                        className: 'action-btn primary',
+                        exportOptions: {
+                            columns: [1,2,3,4,5] // Kolom tanpa "Aksi"
+                        },
+                        customize: function (doc) {
+                            doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+                        }
+                    }
+                ]
             });
 
             // Nomor otomatis pada kolom pertama
