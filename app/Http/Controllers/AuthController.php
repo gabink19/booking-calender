@@ -39,6 +39,10 @@ class AuthController extends Controller
             }
             return back()->withErrors(['login' => 'Username atau password salah']);
         } catch (\Exception $e) {
+            if ($e->getMessage()=="validation.captcha") {
+                // Tangani kesalahan captcha
+                return back()->withErrors(['login' => 'Captcha tidak valid. Silakan coba lagi.']);
+            }
             return back()->withErrors(['login' => 'Terjadi kesalahan. Silakan coba lagi nanti.']);
         }
     }
