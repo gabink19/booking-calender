@@ -21,21 +21,15 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        if (app()->environment('local')) {
-            $validator = Validator::make($request->all(), [
-                'username' => 'required',
-                'password' => 'required',
-            ]);
-        }else{
-            $validator = Validator::make($request->all(), [
-                'username' => 'required',
-                'password' => 'required',
-                'g-recaptcha-response' => 'required|captcha'
-            ], [
-                'g-recaptcha-response.required' => 'Captcha wajib diisi.',
-                'g-recaptcha-response.captcha' => 'Captcha tidak valid.'
-            ]);
-        }
+        // Validasi input dasar
+        $validator = Validator::make($request->all(), [
+            'username' => 'required',
+            'password' => 'required',
+            'g-recaptcha-response' => 'required'
+        ], [
+            'g-recaptcha-response.required' => 'Captcha wajib diisi.'
+        ]);
+
         if ($validator->fails()) {
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
@@ -43,6 +37,38 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        // Validasi reCAPTCHA manual
+        $secret = env('RECAPTCHA_SECRET_KEY'); // simpan secret key di .env
+        $response = $request->input('g-recaptcha-response');
+        $remoteip = $request->ip();
+
+        $url = "https://www.google.com/recaptcha/api/siteverify";
+        $data = [
+            'secret' => $secret,
+            'response' => $response,
+            'remoteip' => $remoteip
+        ];
+
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                'content' => http_build_query($data)
+            ]
+        ];
+        $context = stream_context_create($options);
+        $verify = file_get_contents($url, false, $context);
+        $captcha_success = json_decode($verify);
+
+        if (!$captcha_success || empty($captcha_success->success) || $captcha_success->success !== true) {
+            $errorMsg = 'Captcha tidak valid. Silakan coba lagi.';
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'errors' => ['captcha' => $errorMsg]], 422);
+            }
+            return back()->withErrors(['captcha' => $errorMsg])->withInput();
+        }
+
+        // Proses login seperti biasa
         $user = User::where('username', $request->username)->first();
         if ($user && password_verify($request->password, $user->password)) {
             if (!$user->is_active) {
