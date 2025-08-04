@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -20,35 +21,42 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        try {
-            $request->validate([
+        if (app()->environment('local')) {
+            $validator = Validator::make($request->all(), [
                 'username' => 'required',
                 'password' => 'required',
-                'captcha'  => 'required|captcha'
             ]);
-
-            $user = User::where('username', $request->username)->first();
-            if ($user && password_verify($request->password, $user->password)) {
-                // Tambahkan pengecekan status aktif
-                if (!$user->is_active) {
-                    return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi admin.']);
-                }
-                Session::put('user_id', $user->uuid);
-                Session::put('unit', $user->unit);
-                if ($user->is_admin) {
-                    Session::put('is_admin', true);
-                    return redirect()->route('admin.dashboard');
-                }
-                return redirect()->route('booking');
-            }
-            return back()->withErrors(['login' => 'Username atau password salah']);
-        } catch (\Exception $e) {
-            if ($e->getMessage()=="validation.captcha") {
-                // Tangani kesalahan captcha
-                return back()->withErrors(['login' => 'Captcha tidak valid. Silakan coba lagi.']);
-            }
-            return back()->withErrors(['login' => 'Terjadi kesalahan. Silakan coba lagi nanti.']);
+        }else{
+            $validator = Validator::make($request->all(), [
+                'username' => 'required',
+                'password' => 'required',
+                'g-recaptcha-response' => 'required|captcha'
+            ], [
+                'g-recaptcha-response.required' => 'Captcha wajib diisi.',
+                'g-recaptcha-response.captcha' => 'Captcha tidak valid.'
+            ]);
         }
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $user = User::where('username', $request->username)->first();
+        if ($user && password_verify($request->password, $user->password)) {
+            if (!$user->is_active) {
+                return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi admin.']);
+            }
+            Session::put('user_id', $user->uuid);
+            Session::put('unit', $user->unit);
+            if ($user->is_admin) {
+                Session::put('is_admin', true);
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('booking');
+        }
+        return back()->withErrors(['login' => 'Username atau password salah']);
     }
 
     public function loginAdmin(Request $request)

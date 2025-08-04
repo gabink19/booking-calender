@@ -166,13 +166,15 @@ function openBookingModal({date, hour, hourVal}) {
             document.getElementById('duration2').addEventListener('change', function() {
                 if (this.checked) {
                     const jam = parseInt(hour, 10);
-                    if (jam === 23) {
+                    if (jam === 20) {
                         document.getElementById('modal-hour-end').value = '';
                         document.getElementById('modal-hour-end-display').style.display = 'none';
+                        document.getElementById('duration2').disabled = true;
                     } else {
                         document.getElementById('modal-hour-end').value = (jam+1).toString().padStart(2,'0');
-                        document.getElementById('modal-hour-end-display').value = (jam+1).toString().padStart(2,'0') + ':00 - '+(jam+1).toString().padStart(2,'0') + ':59';
+                        document.getElementById('modal-hour-end-display').value = (jam+1).toString().padStart(2,'0') + ':00 - '+(jam+2).toString().padStart(2,'0') + ':00';
                         document.getElementById('modal-hour-end-display').style.display = '';
+                        document.getElementById('duration2').disabled = false;
                     }
                 }
             });

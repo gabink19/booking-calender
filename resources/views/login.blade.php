@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ time() }}">
   <!-- SweetAlert2 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <!-- Tambahkan di dalam <head> atau sebelum </body> -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <div class="container">
@@ -30,11 +32,9 @@
       <input type="password" id="password" name="password" class="form-input" required/>
 
       <label for="captcha" class="form-label">Captcha</label>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <img src="{{ captcha_src('flat') }}" alt="captcha" id="captcha-img" style="height:38px;">
-        <button type="button" onclick="refreshCaptcha()" style="padding:4px 10px;">⟳</button>
+      <div style="margin-bottom:8px;">
+        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
       </div>
-      <input type="text" id="captcha" name="captcha" class="form-input" required placeholder="Masukkan hasil di atas"/>
       <button type="submit" class="btn-login">Login</button>
     </form>
   </div>
@@ -62,12 +62,13 @@
     });
   </script>
 
-  @if($errors->has('login'))
+  @if ($errors->any())
     <script>
+      let errorMsg = {!! json_encode(implode("\n", $errors->all())) !!};
       Swal.fire({
         icon: 'error',
         title: 'Login Gagal',
-        text: "{{ $errors->first('login') }}",
+        text: errorMsg,
         confirmButtonColor: '#6366f1'
       });
     </script>

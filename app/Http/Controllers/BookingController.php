@@ -109,11 +109,14 @@ class BookingController extends Controller
                     'updated_at' => now(),
                 ]);
         }
-        // Kirim notifikasi WhatsApp (gunakan Notification atau API eksternal)
-        // Notification::route('whatsapp', $booking->whatsapp)
-        //     ->notify(new BookingWhatsappNotification($booking));
-        // event(new BookingEvent("newBooking"));
         broadcast(new BookingEvent("newBooking"))->toOthers();
+        // Kirim notifikasi WhatsApp (gunakan Notification atau API eksternal)
+        if(!Session::has('is_admin')){
+            $userId = session('user_id');
+            // $user = User::select('whatsapp')->where('uuid', $userId)->first();
+            // $this->sendNotification($user->whatsapp, "booking");
+
+        }
         return response()->json(['success' => true, 'message' => 'Booking berhasil!']);
     }
 
@@ -204,7 +207,7 @@ class BookingController extends Controller
 
         $slots = [];
         $unit = session('unit');
-        for ($h = 6; $h < 22; $h++) {
+        for ($h = 6; $h < 21; $h++) {
             $isBooked = isset($bookedHours[$h]);
             $status = $isBooked ? 'Dipesan' : 'Tersedia';
             $unitsBooked = '';
@@ -225,7 +228,7 @@ class BookingController extends Controller
             $slots[] = [
                 'date' => $date,
                 'hour' => $h,
-                'label' => sprintf('%02d:00 - %02d:59', $h, $h),
+                'label' => sprintf('%02d:00 - %02d:00', $h, $h+1),
                 'status' => $status,
                 'units' => $unitsBooked, // Tambahan: daftar unit yang booking slot ini
             ];
@@ -260,5 +263,41 @@ class BookingController extends Controller
         $userId = session('user_id');
         $user = User::select('uuid','username','name', 'unit', 'whatsapp','created_at')->where('uuid', $userId)->first();
         return view('profil', compact('user'));
+    }
+
+    public function sendNotification($noWa, $notificationType)
+    {
+        // Validasi nomor WhatsApp
+        if (!$noWa || !preg_match('/^\+?[0-9]{10,15}$/', $noWa)) {
+            return response()->json(['error' => 'Nomor WhatsApp tidak valid'], 422);
+        }
+
+        // Validasi jenis notifikasi
+        if (!in_array($notificationType, ['booking', 'reminder'])) {
+            return response()->json(['error' => 'Jenis notifikasi tidak valid'], 422);
+        }
+
+        // Kirim notifikasi WhatsApp via API eksternal
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://app.saungwa.com/api/create-message',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'appkey' => env('SAUNGWA_APPKEY'),
+                'authkey' => env('SAUNGWA_AUTHKEY'),
+                'to' => $noWa,
+                'message' => 'Notifikasi booking Anda: ' . $notificationType,
+                'sandbox' => 'false'
+            ),
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return response()->json(['success' => true, 'message' => 'Notifikasi berhasil dikirim!', 'api_response' => $response]);
     }
 }
