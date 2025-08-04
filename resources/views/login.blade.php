@@ -33,7 +33,7 @@
 
       <label for="captcha" class="form-label">Captcha</label>
       <div style="margin-bottom:8px;">
-        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITEKEY') }}"></div>
+        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
       </div>
       <button type="submit" class="btn-login">Login</button>
     </form>
