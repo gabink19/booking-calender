@@ -60,7 +60,7 @@ class BookingController extends Controller
             ->where('status', 'active')
             ->count();
         if ($existing>0) {
-            return response()->json(['error' => 'Slot pada tanggal dan jam tersebut sudah dipesan!']);
+            return response()->json(['error' => __('booking.slot_already_booked')]);
         }
         if(!Session::has('is_admin')){
             $nowBookCount = 1;
@@ -73,7 +73,7 @@ class BookingController extends Controller
                 ->where('status', 'active')
                 ->count();
             if ($unitDayBookings+$nowBookCount > 2) {
-                return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
+                return response()->json(['error' => __('booking.max_per_day_week')]);
             }
 
             // Cek booking per minggu maksimal 4 jam untuk unit yang sama
@@ -84,7 +84,7 @@ class BookingController extends Controller
                 ->where('status', 'active')
                 ->count();
             if ($unitWeekBookings >= 4) {
-                return response()->json(['error' => 'Maksimal 2 jam per unit di hari yang sama dan Maksimal 4 jam per unit di minggu yang sama!']);
+                return response()->json(['error' => __('booking.max_per_day_week')]);
             }
         }
         $unit = session('unit');
@@ -117,7 +117,7 @@ class BookingController extends Controller
             // $this->sendNotification($user->whatsapp, "booking");
 
         }
-        return response()->json(['success' => true, 'message' => 'Booking berhasil!']);
+        return response()->json(['success' => true, 'message' => __('booking.booking_success')]);
     }
 
     // Cancel booking (minimal 1 jam sebelum mulai)
@@ -129,7 +129,7 @@ class BookingController extends Controller
         if ($start->diffInMinutes($now, false) > -60) {
             return response()->json([
                 'success' => false,
-                'error' => 'Cancel hanya bisa 1 jam sebelum jam mulai!'
+                'error' => __('booking.cancel_time_error')
             ]);
         }
         $booking->status = 'cancelled';
@@ -138,7 +138,7 @@ class BookingController extends Controller
         broadcast(new BookingEvent("newBooking"))->toOthers();
         return response()->json([
             'success' => true,
-            'message' => 'Pemesanan berhasil dibatalkan.'
+            'message' => __('booking.cancel_success')
         ]);
     }
 
@@ -156,7 +156,7 @@ class BookingController extends Controller
             fputcsv($handle, ['Tanggal', 'Jam Mulai', 'Jam Selesai', 'Unit', 'Nama', 'WA', 'Status']);
             foreach ($bookings as $b) {
                 fputcsv($handle, [
-                    $b->date, $b->hour_start, $b->hour_end, $b->unit, $b->name, $b->whatsapp, $b->status
+                    $b->date, $b->hour_start, $b->hour_end, $b->unit, $b->name, $b->whatsapp, __($b->status == 'active' ? 'booking.status_active' : 'booking.status_cancelled')
                 ]);
             }
             fclose($handle);
@@ -174,11 +174,12 @@ class BookingController extends Controller
     {
         $mulai = Carbon::now()->startOfWeek(Carbon::MONDAY);
         $tanggal = [];
+        $locale = app()->getLocale(); // ambil locale dari aplikasi
         for ($i = 0; $i < 7; $i++) {
-            $carbon = $mulai->copy()->addDays($i)->locale('id');
+            $carbon = $mulai->copy()->addDays($i)->locale($locale);
             $tanggal[] = [
                 'tanggal' => $carbon->toDateString(),
-                'hari' => $carbon->translatedFormat('l'), // Nama hari dalam bahasa Indonesia
+                'hari' => $carbon->translatedFormat('l'), // Nama hari sesuai bahasa
             ];
         }
         return $tanggal;
@@ -209,28 +210,28 @@ class BookingController extends Controller
         $unit = session('unit');
         for ($h = 6; $h < 21; $h++) {
             $isBooked = isset($bookedHours[$h]);
-            $status = $isBooked ? 'Dipesan' : 'Tersedia';
+            $status = $isBooked ? __('booking.status_booked') : __('booking.status_available');
             $unitsBooked = '';
             $unitsBookedH = '';
             if ($isBooked) {
                 $unitsBookedH = $bookedHours[$h];
             }
-            if ($status=='Dipesan') {
+            if ($status == __('booking.status_booked')) {
                 $unitsBooked = $unitsBookedH;
             }
-            if ($unit==$unitsBookedH) {
-                $unitsBooked='';
+            if ($unit == $unitsBookedH) {
+                $unitsBooked = '';
             }
             if ($isBooked && $bookedHours[$h]) {
                 $unitData = User::where('unit', $bookedHours[$h])->first();
-                $unitsBooked = $unitData->is_admin ? 'Pemeliharaan' : $unitsBooked;
+                $unitsBooked = $unitData->is_admin ? __('booking.status_maintenance') : $unitsBooked;
             }
             $slots[] = [
                 'date' => $date,
                 'hour' => $h,
                 'label' => sprintf('%02d:00 - %02d:00', $h, $h+1),
                 'status' => $status,
-                'units' => $unitsBooked, // Tambahan: daftar unit yang booking slot ini
+                'units' => $unitsBooked,
             ];
         }
         return $slots;
@@ -249,7 +250,7 @@ class BookingController extends Controller
     {
         $unit = session('unit');
         if (!$unit) {
-            return redirect('/')->with('error', 'Unit tidak ditemukan di sesi.');
+            return redirect('/')->with('error', __('booking.unit_not_found'));
         }
         $bookings = Booking::where('unit', $unit)
             ->orderBy('date', 'desc')
@@ -269,12 +270,10 @@ class BookingController extends Controller
     {
         // Validasi nomor WhatsApp
         if (!$noWa || !preg_match('/^\+?[0-9]{10,15}$/', $noWa)) {
-            return response()->json(['error' => 'Nomor WhatsApp tidak valid'], 422);
+            return response()->json(['error' => __('booking.invalid_whatsapp')], 422);
         }
-
-        // Validasi jenis notifikasi
         if (!in_array($notificationType, ['booking', 'reminder'])) {
-            return response()->json(['error' => 'Jenis notifikasi tidak valid'], 422);
+            return response()->json(['error' => __('booking.invalid_notification_type')], 422);
         }
 
         // Kirim notifikasi WhatsApp via API eksternal
@@ -298,6 +297,6 @@ class BookingController extends Controller
         ));
         $response = curl_exec($curl);
         curl_close($curl);
-        return response()->json(['success' => true, 'message' => 'Notifikasi berhasil dikirim!', 'api_response' => $response]);
+        return response()->json(['success' => true, 'message' => __('booking.notification_sent'), 'api_response' => $response]);
     }
 }

@@ -3,7 +3,7 @@
 @section('content')
 <div style="display: flex; gap: 32px; flex-wrap: wrap;">
     <div class="card summary" style="flex:1 1 340px; min-width:320px;">
-        <h2>Logo App</h2>
+        <h2>{{ __('settings.logo_title') }}</h2>
         @php
             $logoPath = $settings['app_logo'] ?? 'default-logo.png';
         @endphp
@@ -17,13 +17,13 @@
                     style="width:70%;padding: 6px 12px; border: 1px solid #9ea8b7ff; border-radius: 6px; background: #fff; font-size: 13px; color: #3041b7; cursor: pointer;"/>
                 <button type="submit" class="action-btn primary" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span class="material-icons" style="vertical-align:middle;">upload</span>
-                    <span class="d-none d-md-inline">Simpan</span>
+                    <span class="d-none d-md-inline">{{ __('settings.save') }}</span>
                 </button>
             </form>
         </div>
     </div>
     <div class="card summary" style="flex:1 1 340px; min-width:320px;">
-        <h2>Background App</h2>
+        <h2>{{ __('settings.background_title') }}</h2>
         @php
             $backgroundPath = $settings['app_background'] ?? 'default-background.png';
         @endphp
@@ -37,15 +37,15 @@
                     style="width:70%;padding: 6px 12px; border: 1px solid #9ea8b7ff; border-radius: 6px; background: #fff; font-size: 13px; color: #3041b7; cursor: pointer;"/>
                 <button type="submit" class="action-btn primary" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span class="material-icons" style="vertical-align:middle;">upload</span>
-                    <span class="d-none d-md-inline">Simpan</span>
+                    <span class="d-none d-md-inline">{{ __('settings.save') }}</span>
                 </button>
             </form>
         </div>
     </div>
     <div class="card summary">
-        <h2>Informasi Aplikasi</h2>
+        <h2>{{ __('settings.info_title') }}</h2>
         <div>
-            <h3>Nomor Kontak :</h3>
+            <h3>{{ __('settings.contact_label') }} :</h3>
             <form action="{{ route('admin.settings.info') }}" method="POST" class="info-form-responsive" style="display: flex; align-items: center; gap: 12px; background: #ebeef7; border-radius: 8px; padding: 16px 18px; box-shadow: 0 1px 4px rgba(60,80,180,0.07);">
                 @csrf
                 <input type="hidden" name="key" value="contact">
@@ -54,7 +54,7 @@
                     value="{{ $settings['contact'] ?? '' }}"/>
                 <button type="submit" class="action-btn primary" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span class="material-icons" style="vertical-align:middle;">save</span>
-                    <span class="d-none d-md-inline">Simpan</span>
+                    <span class="d-none d-md-inline">{{ __('settings.save') }}</span>
                 </button>
             </form>
         </div>

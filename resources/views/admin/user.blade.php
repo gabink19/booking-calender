@@ -6,21 +6,21 @@
         Manajemen User
         <button id="btn-tambah-user" class="action-btn primary" style="display: inline-flex; align-items: center; gap: 6px;">
             <span class="material-icons" style="vertical-align:middle;">person_add</span>
-            <span class="d-none d-md-inline">Tambah Pengguna</span>
+            <span class="d-none d-md-inline">{{ __('user_admin.add_user') }}</span>
         </button>
     </h2>
     <div class="table-responsive">
         <table id="userTable" class="display" style="width:100%">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>No. Unit</th>
-                    <th>ID Pengguna</th>
-                    <th>Nama</th>
-                    <th>WhatsApp</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
+                    <th>{{ __('user_admin.no') }}</th>
+                    <th>{{ __('user_admin.unit') }}</th>
+                    <th>{{ __('user_admin.username') }}</th>
+                    <th>{{ __('user_admin.name') }}</th>
+                    <th>{{ __('user_admin.whatsapp') }}</th>
+                    <th>{{ __('user_admin.role') }}</th>
+                    <th>{{ __('user_admin.status') }}</th>
+                    <th>{{ __('user_admin.action') }}</th>
                 </tr>
             </thead>
             <tbody id="user-management-body">
@@ -34,16 +34,16 @@
                             <td>{{ $user->whatsapp }}</td>
                             <td>
                                 @if($user->is_admin)
-                                    <span>Admin</span>
+                                    <span>{{ __('user_admin.admin') }}</span>
                                 @else
-                                    <span>Pengguna</span>
+                                    <span>{{ __('user_admin.user') }}</span>
                                 @endif
                             </td>
                             <td>
                                 @if($user->is_active)
-                                    <span class="label label-green">Aktif</span>
+                                    <span class="label label-green">{{ __('user_admin.active') }}</span>
                                 @else
-                                    <span class="label label-red">Tidak Aktif</span>
+                                    <span class="label label-red">{{ __('user_admin.inactive') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -51,7 +51,7 @@
                                 <div class="actions">
                                     <button class="action-btn detail" title="Edit User">
                                         <span class="material-icons" style="vertical-align:middle;">edit</span>
-                                        <span class="d-none d-md-inline">Edit</span>
+                                        <span class="d-none d-md-inline">{{ __('user_admin.edit') }}</span>
                                     </button>
                                 </div>
                                 @endif
@@ -60,7 +60,7 @@
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="8" class="text-center">Tidak ada data user.</td>
+                        <td colspan="8" class="text-center">{{ __('user_admin.no_data') }}</td>
                     </tr>
                 @endif
             </tbody>
@@ -110,16 +110,16 @@
     $(document).ready(function() {
         var t = $('#userTable').DataTable({
             "language": {
-                "search": "Cari:",
-                "lengthMenu": "Tampilkan _MENU_ data",
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                "search": "{{ __('user_admin.search') }}",
+                "lengthMenu": "{{ __('user_admin.length_menu') }}",
+                "info": "{{ __('user_admin.info') }}",
                 "paginate": {
-                    "first": "Pertama",
-                    "last": "Terakhir",
-                    "next": "Berikutnya",
-                    "previous": "Sebelumnya"
+                    "first": "{{ __('user_admin.first') }}",
+                    "last": "{{ __('user_admin.last') }}",
+                    "next": "{{ __('user_admin.next') }}",
+                    "previous": "{{ __('user_admin.previous') }}"
                 },
-                "zeroRecords": "Tidak ada data ditemukan",
+                "zeroRecords": "{{ __('user_admin.zero_records') }}",
             },
             "columnDefs": [
                 { "orderable": false, "searchable": false, "targets": 0 }
@@ -138,48 +138,49 @@
         $('#btn-tambah-user').on('click', function(e) {
             e.preventDefault();
             Swal.fire({
-                title: 'Tambah Pengguna',
+                title: '{{ __("user_admin.add_user") }}',
                 html:
                     `<form id="form-tambah-user" autocomplete="off" style="font-size: 0.80em !important;">
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
-                            <label for="unit" style="width:110px;text-align:right;margin-right:10px;">No. Unit</label>
-                            <input type="text" id="unit" class="swal2-input" style="width:70%;" placeholder="No. Unit" required>
+                            <label for="unit" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.unit") }}</label>
+                            <input type="text" id="unit" class="swal2-input" style="width:70%;" placeholder="{{ __("user_admin.unit") }}" required>
                         </div>
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
-                            <label for="username" style="width:110px;text-align:right;margin-right:10px;">ID Pengguna</label>
-                            <input type="text" id="username" class="swal2-input" style="width:70%;" placeholder="ID Pengguna" required>
+                            <label for="username" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.username") }}</label>
+                            <input type="text" id="username" class="swal2-input" style="width:70%;" placeholder="{{ __("user_admin.username") }}" required>
                         </div>
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
-                            <label for="password" style="width:110px;text-align:right;margin-right:10px;">Password</label>
-                            <input type="password" id="password" class="swal2-input" style="width:70%;" placeholder="Password" required>
+                            <label for="password" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.password") }}</label>
+                            <input type="password" id="password" class="swal2-input" style="width:70%;" placeholder="{{ __("user_admin.password") }}" required>
                         </div>
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
-                            <label for="name" style="width:110px;text-align:right;margin-right:10px;">Nama</label>
-                            <input type="text" id="name" class="swal2-input" style="width:70%;" placeholder="Nama" required>
+                            <label for="name" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.name") }}</label>
+                            <input type="text" id="name" class="swal2-input" style="width:70%;" placeholder="{{ __("user_admin.name") }}" required>
                         </div>
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
-                            <label for="whatsapp" style="width:110px;text-align:right;margin-right:10px;">WhatsApp</label>
-                            <input type="text" id="whatsapp" class="swal2-input" style="width:70%;" placeholder="WhatsApp" required>
+                            <label for="whatsapp" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.whatsapp") }}</label>
+                            <input type="text" id="whatsapp" class="swal2-input" style="width:70%;" placeholder="{{ __("user_admin.whatsapp") }}" required>
                         </div>
                         <div style="display:flex;align-items:center;margin-bottom:8px;">
-                            <label for="role" style="width:110px;text-align:right;margin-right:10px;">Role</label>
-                            <select id="role" class="swal2-input" style="width:64%;height:40px;padding:0.75em;font-size:1em;margin-top: 10px;margin-left: 4%;">
-                                <option value="0">Pengguna</option>
+                            <label for="role" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.role") }}</label>
+                            <select id="role" class="swal2-input" style="width:64%;height:40px;">
+                                <option value="0">{{ __("user_admin.user") }}</option>
+                                <option value="1">{{ __("user_admin.admin") }}</option>
                             </select>
                         </div>
                         <div style="display:flex;align-items:center;">
-                            <label for="status" style="width:110px;text-align:right;margin-right:10px;">Status</label>
-                            <select id="status" class="swal2-input" style="width:64%;height:40px;padding:0.75em;font-size:1em;margin-top: 10px;margin-left: 4%;">
-                                <option value="">Pilih Status</option>
-                                <option value="1">Aktif</option>
-                                <option value="0">Tidak Aktif</option>
+                            <label for="status" style="width:110px;text-align:right;margin-right:10px;">{{ __("user_admin.status") }}</label>
+                            <select id="status" class="swal2-input" style="width:64%;height:40px;">
+                                <option value="">{{ __("user_admin.choose_status") }}</option>
+                                <option value="1">{{ __("user_admin.active") }}</option>
+                                <option value="0">{{ __("user_admin.inactive") }}</option>
                             </select>
                         </div>
                     </form>`,
+                confirmButtonText: '{{ __("user_admin.save") }}',
+                cancelButtonText: '{{ __("user_admin.cancel") }}',
                 focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: 'Simpan',
-                cancelButtonText: 'Batal',
                 preConfirm: () => {
                     return {
                         unit: $('#unit').val(),
@@ -208,24 +209,21 @@
                             is_active: result.value.status
                         },
                         success: function(res) {
-                            Swal.fire('Berhasil', 'Pengguna berhasil ditambahkan!', 'success').then(() => {
+                            Swal.fire('{{ __("user_admin.success") }}', '{{ __("user_admin.add_success") }}', 'success').then(() => {
                                 location.reload();
                             });
                         },
                         error: function(xhr) {
-                            // Ambil pesan error dari response jika ada
-                            let msg = 'Terjadi kesalahan saat menambah pengguna.';
+                            let msg = '{{ __("user_admin.add_failed") }}';
                             if (xhr.responseJSON && xhr.responseJSON.message) {
                                 msg = xhr.responseJSON.message;
                             }
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Gagal',
+                                title: '{{ __("user_admin.failed") }}',
                                 html: msg,
-                                showCancelButton: true,
-                                showConfirmButton: true,
-                                confirmButtonText: 'Coba Lagi',
-                                cancelButtonText: 'Tutup',
+                                confirmButtonText: '{{ __("user_admin.retry") }}',
+                                cancelButtonText: '{{ __("user_admin.close") }}',
                                 focusConfirm: false,
                                 didOpen: () => {
                                     // Isi ulang data yang sudah diinput sebelumnya
@@ -265,7 +263,7 @@
                 if (response.success) {
                     let user = response.data;
                     Swal.fire({
-                        title: 'Edit Pengguna',
+                        title: '{{ __("user_admin.edit_user") }}',
                         html:
                             `<form id="form-edit-user" autocomplete="off" style="font-size: 0.80em !important;">
                                 <div style="display:flex;align-items:center;margin-bottom:8px;">
@@ -290,14 +288,14 @@
                                 </div>
                                 <div style="display:flex;align-items:center;margin-bottom:8px;">
                                     <label for="role" style="width:110px;text-align:right;margin-right:10px;">Role</label>
-                                    <select id="role" class="swal2-input" style="width:64%;height:40px;padding:0.75em;font-size:1em;margin-top: 10px;margin-left: 4%;">
+                                    <select id="role" class="swal2-input" style="width:64%;height:40px;">
                                         <option value="1" ${user.is_admin == 1 ? 'selected' : ''}>Admin</option>
                                         <option value="0" ${user.is_admin == 0 ? 'selected' : ''}>Pengguna</option>
                                     </select>
                                 </div>
                                 <div style="display:flex;align-items:center;">
                                     <label for="status" style="width:110px;text-align:right;margin-right:10px;">Status</label>
-                                    <select id="status" class="swal2-input" style="width:64%;height:40px;padding:0.75em;font-size:1em;margin-top: 10px;margin-left: 4%;">
+                                    <select id="status" class="swal2-input" style="width:64%;height:40px;">
                                         <option value="1" ${user.is_active == 1 ? 'selected' : ''}>Aktif</option>
                                         <option value="0" ${user.is_active == 0 ? 'selected' : ''}>Tidak Aktif</option>
                                     </select>
@@ -305,8 +303,8 @@
                             </form>`,
                         focusConfirm: false,
                         showCancelButton: true,
-                        confirmButtonText: 'Simpan',
-                        cancelButtonText: 'Batal',
+                        confirmButtonText: '{{ __("user_admin.save") }}',
+                        cancelButtonText: '{{ __("user_admin.cancel") }}',
                         preConfirm: () => {
                             return {
                                 unit: $('#unit').val(),

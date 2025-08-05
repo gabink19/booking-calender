@@ -6,7 +6,7 @@ document.querySelectorAll('.tanggal-btn').forEach(btn => {
     const date = btn.getAttribute('data-date');
     // Tampilkan loading SweetAlert2
     Swal.fire({
-      title: 'Memuat data...',
+      title: `${window.bookingLang.loading}`,
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -30,7 +30,7 @@ document.querySelectorAll('.tanggal-btn').forEach(btn => {
         Swal.close(); // Tutup loading setelah selesai
       })
       .catch(() => {
-        Swal.fire('Gagal', 'Gagal memuat data. Silakan coba lagi.', 'error');
+        Swal.fire(`${window.bookingLang.failed}`, `${window.bookingLang.errorGeneral}`, 'error');
       });
   });
 });
@@ -63,11 +63,11 @@ function openBookingModal({date, hour, hourVal}) {
     let unit = user.unit
     if (user.is_admin=="1") {
       aktifitas = 'Aktifitas'
-      unit = 'Pemeliharaan'
+      unit = `${window.bookingLang.statusMaintenance}`
       style = 'style="display:none;"'
     }
     Swal.fire({
-    title: 'Pesan Lapangan',
+    title: `${window.bookingLang.bookingTitle}`,
     html: `
     <style>
       #bookingFormSwal label {
@@ -101,26 +101,26 @@ function openBookingModal({date, hour, hourVal}) {
         <input type="hidden" id="modal-hour" value="${hourVal}">
         <input type="hidden" id="modal-hour-end">
         <div class="form-row">
-          <label>Durasi :</label>
+          <label>${window.bookingLang.duration} :</label>
           <div style="flex:1;display:flex;gap:10px;">
             <div>
               <input type="radio" name="durationRadio" id="duration1" value="1" checked>
-              <label for="duration1">1 Jam</label>
+              <label for="duration1">1 ${window.bookingLang.hour}</label>
             </div>
             <div>
               <input type="radio" name="durationRadio" id="duration2" value="2">
-              <label for="duration2" id="labelduration2">2 Jam</label>
+              <label for="duration2" id="labelduration2">2 ${window.bookingLang.hour}</label>
             </div>
           </div>
         </div>
         <div class="form-row">
-          <label>Tanggal :</label>
+          <label>${window.bookingLang.date} :</label>
           <div style="flex:1;">
             <input type="text" id="modal-date-display" value="${date}" disabled>
           </div>
         </div>
         <div class="form-row">
-          <label>Jam :</label>
+          <label>${window.bookingLang.hour} :</label>
           <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
             <input type="text" id="modal-hour-display" class="hour-input" value="${hour.padStart(2,'0')}" disabled>
             <div style="display:flex;align-items:center;gap:6px;">
@@ -129,7 +129,7 @@ function openBookingModal({date, hour, hourVal}) {
           </div>
         </div>
         <div class="form-row" ${style}>
-          <label>Nama :</label>
+          <label>${window.bookingLang.name} :</label>
           <div style="flex:1;">
             <input type="text" id="modal-name" value="${user.name || ''}" disabled>
           </div>
@@ -188,7 +188,7 @@ function openBookingModal({date, hour, hourVal}) {
             let hourEnd = '';
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
             if (!name || !unit || !whatsapp) {
-                Swal.showValidationMessage('Nama, No. Unit, dan WhatsApp wajib diisi!');
+                Swal.showValidationMessage(`${window.bookingLang.requiredFields}`);
                 return false;
             }
             if (!duration1) {
@@ -228,7 +228,7 @@ function openBookingModal({date, hour, hourVal}) {
             .then(res => res.json())
             .then(res => {
                 if(res.success) {
-                    Swal.fire('Sukses', res.message, 'success');
+                    Swal.fire(`${window.bookingLang.success}`, res.message, 'success');
                     fetch(`booking/slots?date=${encodeURIComponent(date)}`)
                     .then(res => res.json())
                     .then(res => {
@@ -245,11 +245,11 @@ function openBookingModal({date, hour, hourVal}) {
                       });
                     });
                 } else {
-                    Swal.fire('Gagal', res.error || 'Gagal booking!', 'error');
+                    Swal.fire(`${window.bookingLang.failed}`, res.error || `${window.bookingLang.errorBooking}`, 'error');
                 }
             })
             .catch(() => {
-                Swal.fire('Gagal', 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+                Swal.fire(`${window.bookingLang.failed}`, `${window.bookingLang.errorGeneral}`, 'error');
             });
         }
     });
@@ -294,12 +294,12 @@ cancelButtons.forEach(btn => {
 // Fungsi modal SweetAlert2 booking
 function openCancelledModal({ bookingId,datebook }) {
     Swal.fire({
-      title: 'Batalkan Pemesanan',
-      html: `Apakah Anda yakin ingin membatalkan pemesanan lapangan pada <b>${datebook}</b>?`,
+      title: `${window.bookingLang.cancelTitle}`,
+      html: `${window.bookingLang.cancelText} <b>${datebook}</b>?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Ya, Batalkan',
-      cancelButtonText: 'Tidak',
+      confirmButtonText: `${window.bookingLang.cancelConfirm}`,
+      cancelButtonText: `${window.bookingLang.cancelCancel}`,
       customClass: {
         popup: 'swal2-booking-modal'
       },
@@ -317,15 +317,15 @@ function openCancelledModal({ bookingId,datebook }) {
         .then(res => res.json())
         .then(res => {
           if(res.success) {
-          Swal.fire('Sukses', res.message, 'success').then(() => {
+          Swal.fire(`${window.bookingLang.success}`, res.message, 'success').then(() => {
           window.location.href = 'mybooking';
         });
-          } else {
-            Swal.fire('Gagal', res.error || 'Gagal membatalkan booking!', 'error');
-          }
+            } else {
+                Swal.fire(`${window.bookingLang.failed}`, res.error || `${window.bookingLang.errorBooking}`, 'error');
+            }
         })
         .catch(() => {
-          Swal.fire('Gagal', 'Terjadi kesalahan. Silakan coba lagi.', 'error');
+            Swal.fire(`${window.bookingLang.failed}`, `${window.bookingLang.errorGeneral}`, 'error');
         });
       }
     });

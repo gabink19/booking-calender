@@ -74,3 +74,11 @@ Route::middleware('auth.session.admin')->group(function () {
 // Route captcha
 Route::get('captcha/{config?}', [\Mews\Captcha\CaptchaController::class, 'getCaptcha'])->name('captcha');
 Route::get('admin/captcha/{config?}', [\Mews\Captcha\CaptchaController::class, 'getCaptcha'])->name('admin.captcha');
+
+// Route language
+Route::get('lang/{locale}', function ($locale) {
+    if (in_array($locale, ['id', 'en'])) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+});

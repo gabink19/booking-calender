@@ -21,47 +21,62 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Validasi input dasar
-        $validator = Validator::make($request->all(), [
-            'username' => 'required',
-            'password' => 'required',
-            'g-recaptcha-response' => 'required'
-        ], [
-            'g-recaptcha-response.required' => 'Captcha wajib diisi.'
-        ]);
 
-        if ($validator->fails()) {
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        // Skip reCAPTCHA jika di environment local
+        if (app()->environment('local')) { 
+            $validator = Validator::make($request->all(), [
+                'username' => 'required',
+                'password' => 'required',
+            ]);
+            if ($validator->fails()) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+                }
+                return back()->withErrors($validator)->withInput();
             }
-            return back()->withErrors($validator)->withInput();
+            $captcha_success = true;
+        } else {
+            // Validasi input dasar
+            $validator = Validator::make($request->all(), [
+                'username' => 'required',
+                'password' => 'required',
+                'g-recaptcha-response' => 'required'
+            ], [
+                'g-recaptcha-response.required' => 'Captcha wajib diisi.'
+            ]);
+
+            if ($validator->fails()) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+                }
+                return back()->withErrors($validator)->withInput();
+            }
+            // Validasi reCAPTCHA manual
+            $secret = env('RECAPTCHA_SECRET_KEY');
+            $response = $request->input('g-recaptcha-response');
+            $remoteip = $request->ip();
+
+            $url = "https://www.google.com/recaptcha/api/siteverify";
+            $data = [
+                'secret' => $secret,
+                'response' => $response,
+                'remoteip' => $remoteip
+            ];
+
+            $options = [
+                'http' => [
+                    'method' => 'POST',
+                    'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+                    'content' => http_build_query($data)
+                ]
+            ];
+            $context = stream_context_create($options);
+            $verify = file_get_contents($url, false, $context);
+            $captcha_success = json_decode($verify);
         }
 
-        // Validasi reCAPTCHA manual
-        $secret = env('RECAPTCHA_SECRET_KEY'); // simpan secret key di .env
-        $response = $request->input('g-recaptcha-response');
-        $remoteip = $request->ip();
-
-        $url = "https://www.google.com/recaptcha/api/siteverify";
-        $data = [
-            'secret' => $secret,
-            'response' => $response,
-            'remoteip' => $remoteip
-        ];
-
-        $options = [
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
-                'content' => http_build_query($data)
-            ]
-        ];
-        $context = stream_context_create($options);
-        $verify = file_get_contents($url, false, $context);
-        $captcha_success = json_decode($verify);
-
-        if (!$captcha_success || empty($captcha_success->success) || $captcha_success->success !== true) {
-            $errorMsg = 'Captcha tidak valid. Silakan coba lagi.';
+        if (!$captcha_success || (!app()->environment('local') && (empty($captcha_success->success) || $captcha_success->success !== true))) {
+            $errorMsg = __('auth.captcha_invalid');
             if ($request->ajax()) {
                 return response()->json(['success' => false, 'errors' => ['captcha' => $errorMsg]], 422);
             }
@@ -72,7 +87,7 @@ class AuthController extends Controller
         $user = User::where('username', $request->username)->first();
         if ($user && password_verify($request->password, $user->password)) {
             if (!$user->is_active) {
-                return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi admin.']);
+                return back()->withErrors(['login' => __('auth.account_inactive')]);
             }
             Session::put('user_id', $user->uuid);
             Session::put('unit', $user->unit);
@@ -82,7 +97,7 @@ class AuthController extends Controller
             }
             return redirect()->route('booking');
         }
-        return back()->withErrors(['login' => 'Username atau password salah']);
+        return back()->withErrors(['login' => __('auth.login_failed')]);
     }
 
     public function loginAdmin(Request $request)
@@ -98,19 +113,19 @@ class AuthController extends Controller
             if ($user && password_verify($request->password, $user->password) && $user->is_admin) {
                 // Tambahkan pengecekan status aktif
                 if (!$user->is_active) {
-                    return back()->withErrors(['login' => 'Akun Anda tidak aktif. Silakan hubungi Developer.']);
+                    return back()->withErrors(['login' => __('auth.account_inactive_admin')]);
                 }
                 Session::put('user_id', $user->uuid);
                 Session::put('is_admin', true);
                 return redirect()->route('admin.dashboard');
             }
-            return back()->withErrors(['login' => 'Username atau password salah']);
+            return back()->withErrors(['login' => __('auth.login_failed')]);
         } catch (\Exception $e) {
+            // Tangani kesalahan captcha
             if ($e->getMessage()=="validation.captcha") {
-                // Tangani kesalahan captcha
-                return back()->withErrors(['login' => 'Captcha tidak valid. Silakan coba lagi.']);
+                return back()->withErrors(['login' => __('auth.captcha_invalid')]);
             }
-            return back()->withErrors(['login' => 'Terjadi kesalahan. Silakan coba lagi nanti.']);
+            return back()->withErrors(['login' => __('auth.general_error')]);
         }
     }
 
@@ -150,12 +165,12 @@ class AuthController extends Controller
 
         // Jika request AJAX, balas JSON
         if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Pengguna berhasil ditambahkan!']);
+            return response()->json(['success' => true, 'message' => __('auth.user_added')]);
         }
 
         Session::put('uuid', $user->uuid);
 
-        return redirect()->route('booking');
+        return redirect()->route('booking')->with('success', __('auth.user_added'));
     }
 
     public function editUser(Request $request, $uuid)
@@ -184,10 +199,10 @@ class AuthController extends Controller
         $user->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Pengguna berhasil diupdate!']);
+            return response()->json(['success' => true, 'message' => __('auth.user_updated')]);
         }
 
-        return redirect()->back()->with('success', 'Pengguna berhasil diupdate!');
+        return redirect()->back()->with('success', __('auth.user_updated'));
     }
 
     public function changePass(Request $request, $uuid)
@@ -198,17 +213,17 @@ class AuthController extends Controller
         ]);
         $user = User::where('uuid', $request->uuid)->firstOrFail();
         if ($user && !password_verify($request->old_password, $user->password)) {
-            return response()->json(['success' => false, 'message' => 'Password lama salah!']);
+            return response()->json(['success' => false, 'message' => __('auth.old_password_wrong')]);
         }
         $user->password = password_hash($request->new_password, PASSWORD_DEFAULT);
 
         $user->save();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Password berhasil diubah!']);
+            return response()->json(['success' => true, 'message' => __('auth.password_changed')]);
         }
 
-        return redirect()->back()->with('success', 'Password berhasil diubah!');
+        return redirect()->back()->with('success', __('auth.password_changed'));
     }
 
     public function getUser($uuid)
@@ -246,6 +261,6 @@ class AuthController extends Controller
             $user->password = password_hash($user->unit, PASSWORD_DEFAULT);
             $user->save();
         }
-        return response()->json(['success' => true, 'message' => 'Pengguna berhasil diupdate!']);
+        return response()->json(['success' => true, 'message' => __('auth.user_updated')]);
     }
 }

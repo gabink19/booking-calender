@@ -1,27 +1,29 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>Pemesanan Lapangan Tenis</title>
+  <title>{{ __('booking.title') }}</title>
   <link rel="stylesheet" href="{{ asset('css/booking.css') }}?v={{ time() }}">
-  <!-- Tambahkan SweetAlert2 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body style="background:#fff !important">
   <div class="container" style="border: 0px;padding:5px;">
-    <label class="label-tanggal">Pilih Tanggal:</label>
+    <label class="label-tanggal">{{ __('booking.choose_date') }}</label>
     <div class="section" style="overflow-x: auto; white-space: nowrap; scrollbar-width: none; -ms-overflow-style: none;">
       <div class="tanggal-list" style="display: flex; flex-direction: row; gap: 10px; white-space: nowrap; min-width: max-content;">
         @foreach($dates as $date)
         @php
-            $tanggalFormatted = \Carbon\Carbon::parse($date['tanggal'])->locale('id')->isoFormat('dddd, D MMMM Y');
+            $tanggalFormatted = \Carbon\Carbon::parse($date['tanggal'])
+                ->locale(app()->getLocale())
+                ->isoFormat('dddd, D MMMM Y');
+            $labelAvailableSlots = __('booking.available_slots');
         @endphp
           <button 
             class="tanggal-btn{{ $loop->first ? ' selected' : '' }}" 
             data-date="{{ \Carbon\Carbon::parse($date['tanggal'])->format('d-m-Y') }}"
-            onclick="document.getElementById('selected-date-string').innerHTML = 'Slot Waktu Tersedia untuk <b>{{ $tanggalFormatted }}</b>:';"
+            onclick="document.getElementById('selected-date-string').innerHTML = '{{ $labelAvailableSlots }} <b>{{ $tanggalFormatted }}</b>:';"
             style="min-width: 90px; white-space: normal;"
           >
             {{ $date['hari'] }}<br>
@@ -32,14 +34,14 @@
     </div>
     <div class="section">
       <div class="label-slot" id="selected-date-string">
-        Slot Waktu Tersedia untuk <b>
+        {{ __('booking.available_slots') }} <b>
           {{
             \Carbon\Carbon::parse(
               is_array($selectedDate ?? $dates[0]) 
                 ? ($selectedDate['tanggal'] ?? $dates[0]['tanggal']) 
                 : ($selectedDate ?? $dates[0])
             )
-            ->locale('id')
+            ->locale(app()->getLocale())
             ->isoFormat('dddd, D MMMM Y')
           }}
         </b>:
@@ -47,9 +49,8 @@
       <div class="slot-grid">
         @foreach($slots as $slot)
           @php
-            // Cek apakah slot sudah lewat
             $isPast = \Carbon\Carbon::parse($slot['date'].' '.$slot['hour'].':00') < now();
-            $isBooked = $slot['status'] !== 'Tersedia';
+            $isBooked = $slot['status'] !== __('booking.status_available');
             $slotClass = '';
             if ($isBooked) {
               $slotClass = 'slot-booked';
@@ -57,11 +58,11 @@
               $slotClass = 'slot-past';
             }
             $disabled = ($isBooked || $isPast) ? 'disabled' : '';
-            $bookstats= ($slot['units']=='') ? $slot['status'] : $slot['units'];
+            $bookstats = ($slot['units']=='') ? $slot['status'] : $slot['units'];
           @endphp
           <button class="slot {{ $slotClass }}" data-hour="{{ $slot['label'] }}" data-date="{{ $slot['date'] }}" data-hourVal="{{ $slot['hour'] }}" {{ $disabled }}>
             {{ $slot['label'] }}<br>
-            <span>{ $bookstats }</span>
+            <span>{{ $bookstats }}</span>
           </button>
         @endforeach
       </div>
@@ -76,8 +77,6 @@
       });
     </script>
   </div>
-  <!-- Tambahkan SweetAlert2 JS sebelum booking.js -->
-  
   <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
   <script>
     // Inisialisasi Pusher
@@ -109,6 +108,36 @@
     channel.bind('pusher:subscription_succeeded', function() {
         console.log('Berhasil subscribe ke booking-channel');
     });
+  </script>
+  <script>
+  window.bookingLang = {
+    loading: "{{ __('booking.loading') }}",
+    success: "{{ __('booking.success') }}",
+    failed: "{{ __('booking.failed') }}",
+    bookingTitle: "{{ __('booking.booking_title') }}",
+    bookingLabel: "{{ __('booking.booking') }}",
+    cancelTitle: "{{ __('booking.cancel_title') }}",
+    cancelText: "{{ __('booking.cancel_text') }}",
+    cancelConfirm: "{{ __('booking.cancel_confirm') }}",
+    cancelCancel: "{{ __('booking.cancel_cancel') }}",
+    cancelSuccess: "{{ __('booking.cancel_success') }}",
+    cancelFailed: "{{ __('booking.cancel_failed') }}",
+    requiredFields: "{{ __('booking.required_fields') }}",
+    duration: "{{ __('booking.duration') }}",
+    oneHour: "{{ __('booking.one_hour') }}",
+    twoHour: "{{ __('booking.two_hour') }}",
+    date: "{{ __('booking.date') }}",
+    hour: "{{ __('booking.hour') }}",
+    name: "{{ __('booking.name') }}",
+    unit: "{{ __('booking.unit') }}",
+    whatsapp: "{{ __('booking.whatsapp') }}",
+    saveBooking: "{{ __('booking.save_booking') }}",
+    cancelBtn: "{{ __('booking.cancel_btn') }}",
+    errorGeneral: "{{ __('booking.error_general') }}",
+    errorBooking: "{{ __('booking.error_booking') }}",
+    errorCancel: "{{ __('booking.error_cancel') }}",
+    statusMaintenance: "{{ __('booking.status_maintenance') }}",
+  };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="{{ asset('js/booking.js') }}?v={{ time() }}"></script>

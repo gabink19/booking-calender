@@ -1,0 +1,20 @@
+<?php
+return [
+    'login_title' => 'Login Page',
+    'login_subtitle' => 'Bona Vista Apartment',
+    'login_desc' => 'Please login to book the field',
+    'username' => 'Username:',
+    'password' => 'Password',
+    'captcha' => 'Captcha',
+    'login_btn' => 'Login',
+    'fill_all' => 'Username, password, and captcha are required.',
+    'login_failed' => 'Incorrect username or password',
+    'captcha_invalid' => 'Invalid captcha. Please try again.',
+    'account_inactive' => 'Your account is inactive. Please contact admin.',
+    'account_inactive_admin' => 'Your account is inactive. Please contact Developer.',
+    'general_error' => 'An error occurred. Please try again later.',
+    'user_added' => 'User added successfully!',
+    'user_updated' => 'User updated successfully!',
+    'old_password_wrong' => 'Old password is incorrect!',
+    'password_changed' => 'Password changed successfully!',
+];

@@ -1,0 +1,20 @@
+<?php
+return [
+    'login_title' => 'Halaman Login',
+    'login_subtitle' => 'Apartemen Bona Vista',
+    'login_desc' => 'Silakan login untuk memesan lapangan',
+    'username' => 'ID Pengguna:',
+    'password' => 'Password',
+    'captcha' => 'Captcha',
+    'login_btn' => 'Login',
+    'fill_all' => 'ID Pengguna, password, dan captcha wajib diisi.',
+    'login_failed' => 'Username atau password salah',
+    'captcha_invalid' => 'Captcha tidak valid. Silakan coba lagi.',
+    'account_inactive' => 'Akun Anda tidak aktif. Silakan hubungi admin.',
+    'account_inactive_admin' => 'Akun Anda tidak aktif. Silakan hubungi Developer.',
+    'general_error' => 'Terjadi kesalahan. Silakan coba lagi nanti.',
+    'user_added' => 'Pengguna berhasil ditambahkan!',
+    'user_updated' => 'Pengguna berhasil diupdate!',
+    'old_password_wrong' => 'Password lama salah!',
+    'password_changed' => 'Password berhasil diubah!',
+];
