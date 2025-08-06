@@ -52,9 +52,7 @@
       <div style="margin-bottom:8px; display:flex; justify-content:center;">
         <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
       </div>
-      <button type="submit" class="btn-login" id="btn-login"
-        @if(env('APP_ENV') !== 'local') disabled @endif
-      >{{ __('auth.login_btn') }}</button>
+      <button type="submit" class="btn-login">{{ __('auth.login_btn') }}</button>
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -79,20 +77,6 @@
         });
       }
     });
-
-    function enableLogin() {
-      document.getElementById('btn-login').disabled = false;
-    }
-    function disableLogin() {
-      document.getElementById('btn-login').disabled = true;
-    }
-    // Fungsi callback reCAPTCHA
-    function recaptchaCallback() {
-      enableLogin();
-    }
-    // Jika user reload, pastikan tombol tetap disable
-    window.onload = disableLogin;
-
   </script>
 
   @if ($errors->any())
