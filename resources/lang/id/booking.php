@@ -56,4 +56,13 @@ return [
     'status' => 'Status',
     'status_past' => 'Lewat',
     'cancel_booking' => 'Batalkan Pemesanan',
+    'notification_detail' => 'Detail Pemesanan Lapangan Tenis',
+    'notification_duration' => 'Durasi',
+    'notification_1hour' => '1 Jam',
+    'notification_2hour' => '2 Jam',
+    'notification_date' => 'Tanggal',
+    'notification_time' => 'Jam',
+    'notification_name' => 'Nama',
+    'notification_unit' => 'No. Unit',
+    'notification_whatsapp' => 'WhatsApp',
 ];

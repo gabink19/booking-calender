@@ -179,6 +179,9 @@ function openBookingModal({date, hour, hourVal}) {
                 }
             });
         },
+        didClose: () => {
+            // Swal.hideLoading();
+        },
         preConfirm: () => {
             const name = document.getElementById('modal-name').value.trim();
             const unit = document.getElementById('modal-unit').value.trim();
@@ -207,52 +210,61 @@ function openBookingModal({date, hour, hourVal}) {
             };
         }
     }).then((result) => {
-        // window.scrollTo(0, 0);
         if (result.isConfirmed && result.value) {
-          let UrlParam = ""
-          if (typeof user.is_admin === "string") {
+        let UrlParam = "";
+        if (typeof user.is_admin === "string") {
             user.is_admin = parseInt(user.is_admin, 10) || 0;
-          }
-          if (user.is_admin) {
-              UrlParam="/store"
-          }
-            // AJAX POST ke route booking.store
-            fetch('booking'+UrlParam, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(result.value)
-            })
-            .then(res => res.json())
-            .then(res => {
-                if(res.success) {
-                    Swal.fire(`${window.bookingLang.success}`, res.message, 'success');
-                    fetch(`booking/slots?date=${encodeURIComponent(date)}`)
-                    .then(res => res.json())
-                    .then(res => {
-                      document.querySelector('.slot-grid').outerHTML = res.html;
-                      // Pasang ulang event listener untuk slot baru
-                      document.querySelectorAll('.slot').forEach(slot => {
-                        slot.addEventListener('click', () => {
-                          const selectedTanggalBtn = document.querySelector('.tanggal-btn.selected');
-                          const date = selectedTanggalBtn.dataset.date || '';
-                          const hour = slot.dataset.hour || '';
-                          const hourVal = slot.dataset.hourval || '';
-                          openBookingModal({ date, hour, hourVal });
-                        });
-                      });
-                    });
-                } else {
-                    Swal.fire(`${window.bookingLang.failed}`, res.error || `${window.bookingLang.errorBooking}`, 'error');
-                }
-            })
-            .catch(() => {
-                Swal.fire(`${window.bookingLang.failed}`, `${window.bookingLang.errorGeneral}`, 'error');
-            });
         }
-    });
+        if (user.is_admin) {
+            UrlParam = "/store";
+        }
+
+        // Tampilkan loading sebelum AJAX
+        Swal.fire({
+            title: `Saving...`,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // AJAX POST ke route booking.store
+        fetch('booking' + UrlParam, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(result.value)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                Swal.fire(`${window.bookingLang.success}`, res.message, 'success');
+                fetch(`booking/slots?date=${encodeURIComponent(date)}`)
+                .then(res => res.json())
+                .then(res => {
+                    document.querySelector('.slot-grid').outerHTML = res.html;
+                    // Pasang ulang event listener untuk slot baru
+                    document.querySelectorAll('.slot').forEach(slot => {
+                        slot.addEventListener('click', () => {
+                            const selectedTanggalBtn = document.querySelector('.tanggal-btn.selected');
+                            const date = selectedTanggalBtn.dataset.date || '';
+                            const hour = slot.dataset.hour || '';
+                            const hourVal = slot.dataset.hourval || '';
+                            openBookingModal({ date, hour, hourVal });
+                        });
+                    });
+                });
+            } else {
+                Swal.fire(`${window.bookingLang.failed}`, res.error || `${window.bookingLang.errorBooking}`, 'error');
+            }
+        })
+        .catch(() => {
+            Swal.fire(`${window.bookingLang.failed}`, `${window.bookingLang.errorGeneral}`, 'error');
+        });
+    }
+});
 }
 
 // Bottom nav logic: highlight current

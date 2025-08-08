@@ -62,7 +62,7 @@ class BookingController extends Controller
         if ($existing>0) {
             return response()->json(['error' => __('booking.slot_already_booked')]);
         }
-        if(!Session::has('is_admin')){
+        if(Session::has('is_admin')){
             $nowBookCount = 1;
             if ($request->hourEnd!=null) {
                 $nowBookCount++;
@@ -113,11 +113,21 @@ class BookingController extends Controller
         // Kirim notifikasi WhatsApp (gunakan Notification atau API eksternal)
         if(!Session::has('is_admin')){
             $userId = session('user_id');
-            // $user = User::select('whatsapp')->where('uuid', $userId)->first();
-            // $this->sendNotification($user->whatsapp, "booking");
-
+            $user = User::select('name', 'unit', 'whatsapp')->where('uuid', $userId)->first();
+            $bookingData = [
+                'duration' => $request->durationRadio == '2' ? '2 Jam' : '1 Jam',
+                'date' => Carbon::parse($newDateFormat)->locale(app()->getLocale())->translatedFormat('l d F Y'),
+                'hour' =>  $request->durationRadio == '2' ? sprintf('%02d:00 - %02d:00', $request->hour, $request->hour + 2) : sprintf('%02d:00 - %02d:00', $request->hour, $request->hour + 1),
+                'name' => $user->name,
+                'unit' => $user->unit,
+                'whatsapp' => $user->whatsapp,
+            ];
+            $this->sendNotification($user->whatsapp, 'booking', $bookingData);
         }
-        return response()->json(['success' => true, 'message' => __('booking.booking_success')]);
+        return response()->json([
+            'success' => true,
+            'message' => __('booking.booking_success')
+        ]);
     }
 
     // Cancel booking (minimal 1 jam sebelum mulai)
@@ -266,8 +276,13 @@ class BookingController extends Controller
         return view('profil', compact('user'));
     }
 
-    public function sendNotification($noWa, $notificationType)
+    public function sendNotification($noWa, $notificationType, $bookingData = [])
     {
+        // Ubah awalan 0 menjadi 62 jika perlu
+        if (substr($noWa, 0, 1) === '0') {
+            $noWa = '62' . substr($noWa, 1);
+        }
+
         // Validasi nomor WhatsApp
         if (!$noWa || !preg_match('/^\+?[0-9]{10,15}$/', $noWa)) {
             return response()->json(['error' => __('booking.invalid_whatsapp')], 422);
@@ -275,6 +290,33 @@ class BookingController extends Controller
         if (!in_array($notificationType, ['booking', 'reminder'])) {
             return response()->json(['error' => __('booking.invalid_notification_type')], 422);
         }
+
+        // Format pesan notifikasi booking (dua bahasa)
+        $message = __("booking.notification_detail") . " : \n\n";
+        $message .= __("booking.notification_duration") . " : ";
+        if (!empty($bookingData['duration']) && $bookingData['duration'] === '2 Jam') {
+            $message .= __("booking.notification_2hour") . "\n";
+        } else {
+            $message .= __("booking.notification_1hour") . "\n";
+        }
+        $message .= __("booking.notification_date") . " : " . ($bookingData['date'] ?? '-') . "\n";
+        $message .= __("booking.notification_time") . " : ";
+        if (!empty($bookingData['hourEnd'])) {
+            $startHour = (int)($bookingData['hourStart'] ?? $bookingData['hour']);
+            $endHour = (int)$bookingData['hourEnd'];
+            $message .= sprintf("%02d:00 - %02d:00\n", $startHour, $startHour + 1);
+            $message .= sprintf("%02d:00 - %02d:00\n", $endHour, $endHour + 1);
+        } else {
+            $hour = $bookingData['hour'] ?? '-';
+            if (is_numeric($hour)) {
+                $message .= sprintf("%02d:00 - %02d:00\n", $hour, $hour + 1);
+            } else {
+                $message .= $hour . "\n";
+            }
+        }
+        $message .= __("booking.notification_name") . " : " . ($bookingData['name'] ?? '-') . "\n";
+        $message .= __("booking.notification_unit") . " : " . ($bookingData['unit'] ?? '-') . "\n";
+        $message .= __("booking.notification_whatsapp") . " : " . ($bookingData['whatsapp'] ?? '-') . "\n";
 
         // Kirim notifikasi WhatsApp via API eksternal
         $curl = curl_init();
@@ -291,7 +333,7 @@ class BookingController extends Controller
                 'appkey' => env('SAUNGWA_APPKEY'),
                 'authkey' => env('SAUNGWA_AUTHKEY'),
                 'to' => $noWa,
-                'message' => 'Notifikasi booking Anda: ' . $notificationType,
+                'message' => $message,
                 'sandbox' => 'false'
             ),
         ));

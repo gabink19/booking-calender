@@ -56,4 +56,13 @@ return [
     'status' => 'Status',
     'status_past' => 'Past',
     'cancel_booking' => 'Cancel Booking',
+    'notification_detail' => 'Tennis Court Booking Details',
+    'notification_duration' => 'Duration',
+    'notification_1hour' => '1 Hour',
+    'notification_2hour' => '2 Hours',
+    'notification_date' => 'Date',
+    'notification_time' => 'Time',
+    'notification_name' => 'Name',
+    'notification_unit' => 'Unit No.',
+    'notification_whatsapp' => 'WhatsApp',
 ];
