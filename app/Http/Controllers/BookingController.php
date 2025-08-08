@@ -62,7 +62,7 @@ class BookingController extends Controller
         if ($existing>0) {
             return response()->json(['error' => __('booking.slot_already_booked')]);
         }
-        if(Session::has('is_admin')){
+        if(!Session::has('is_admin')){
             $nowBookCount = 1;
             if ($request->hourEnd!=null) {
                 $nowBookCount++;
