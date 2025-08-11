@@ -82,3 +82,6 @@ Route::get('lang/{locale}', function ($locale) {
     }
     return redirect()->back();
 });
+
+// Route notification
+Route::post('/send-notification/{id}', [BookingController::class, 'sendNotification'])->name('booking.sendNotification');

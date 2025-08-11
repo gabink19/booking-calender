@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\BookingWhatsappNotification;
 use App\Events\BookingEvent;
+use App\Models\SendNotif;
+use Illuminate\Support\Str;
 
 use function Psy\debug;
 
@@ -91,7 +93,7 @@ class BookingController extends Controller
         if ($unit) {
             $request->merge(['unit' => $unit]);
         }
-        $booking = Booking::create([
+        Booking::create([
             'date' => $newDateFormat,
             'hour' => (int)$request->hour,
             'unit' => $request->unit,
@@ -100,7 +102,7 @@ class BookingController extends Controller
             'updated_at' => now(),
         ]);
         if ($request->hourEnd!=null) {
-                $booking = Booking::create([
+                Booking::create([
                     'date' => $newDateFormat,
                     'hour' => (int)$request->hourEnd,
                     'unit' => $request->unit,
@@ -110,30 +112,43 @@ class BookingController extends Controller
                 ]);
         }
         broadcast(new BookingEvent("newBooking"))->toOthers();
-        // Kirim notifikasi WhatsApp (gunakan Notification atau API eksternal)
-        if(!Session::has('is_admin')){
+        $notifId = (string) Str::uuid();
+        if (!Session::has('is_admin')) {
             $userId = session('user_id');
             $user = User::select('name', 'unit', 'whatsapp')->where('uuid', $userId)->first();
             $bookingData = [
                 'duration' => $request->durationRadio == '2' ? '2 Jam' : '1 Jam',
                 'date' => Carbon::parse($newDateFormat)->locale(app()->getLocale())->translatedFormat('l d F Y'),
-                'hour' =>  $request->durationRadio == '2' ? sprintf('%02d:00 - %02d:00', $request->hour, $request->hour + 2) : sprintf('%02d:00 - %02d:00', $request->hour, $request->hour + 1),
+                'hour' => $request->hour,
+                'hourEnd' => $request->hourEnd ?? null,
                 'name' => $user->name,
                 'unit' => $user->unit,
                 'whatsapp' => $user->whatsapp,
             ];
-            $this->sendNotification($user->whatsapp, 'booking', $bookingData);
+
+            $message = $this->formatBookingMessage($bookingData);
+
+            // Insert ke send_notif
+            SendNotif::create([
+                'id' => $notifId,
+                'messages' => $message,
+                'user_id' => $userId,
+                'created_at' => now(),
+                'updated_at' => null,
+            ]);
         }
+
         return response()->json([
             'success' => true,
-            'message' => __('booking.booking_success')
+            'message' => __('booking.booking_success'),
+            'notifId' => $notifId
         ]);
     }
 
     // Cancel booking (minimal 1 jam sebelum mulai)
     public function cancel(Request $request, $id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with('user')->findOrFail($id);
         $now = Carbon::now();
         $start = Carbon::parse($booking->date . ' ' . $booking->hour . ':00:00');
         if ($start->diffInMinutes($now, false) > -60) {
@@ -146,9 +161,31 @@ class BookingController extends Controller
         $booking->updated_at = now();
         $booking->save();
         broadcast(new BookingEvent("newBooking"))->toOthers();
+        $notifId = (string) Str::uuid();
+        if (!Session::has('is_admin')) {
+            $bookingData = [
+                'duration' => $request->durationRadio == '2' ? '2 Jam' : '1 Jam',
+                'date' => Carbon::parse($booking->date)->locale(app()->getLocale())->translatedFormat('l d F Y'),
+                'hour' => $booking->hour,
+                'hourEnd' => $booking->hourEnd ?? null,
+                'name' => $booking->user->name,
+                'unit' => $booking->user->unit,
+                'whatsapp' => $booking->user->whatsapp,
+            ];
+            $message = $this->formatCancelMessage($bookingData);
+            // Insert ke send_notif
+            SendNotif::create([
+                'id' => $notifId,
+                'messages' => $message,
+                'user_id' => $booking->user->uuid,
+                'created_at' => now(),
+                'updated_at' => null,
+            ]);
+        }
         return response()->json([
             'success' => true,
-            'message' => __('booking.cancel_success')
+            'message' => __('booking.cancel_success'),
+            'notifId' => $notifId
         ]);
     }
 
@@ -276,8 +313,13 @@ class BookingController extends Controller
         return view('profil', compact('user'));
     }
 
-    public function sendNotification($noWa, $notificationType, $bookingData = [])
+    public function sendNotification(Request $request, $id)
     {
+        
+        $getNotif = SendNotif::with('user')->findOrFail($id);
+        $noWa = $getNotif->user ? $getNotif->user->whatsapp : null;
+        $message = $getNotif->messages;
+
         // Ubah awalan 0 menjadi 62 jika perlu
         if (substr($noWa, 0, 1) === '0') {
             $noWa = '62' . substr($noWa, 1);
@@ -287,38 +329,19 @@ class BookingController extends Controller
         if (!$noWa || !preg_match('/^\+?[0-9]{10,15}$/', $noWa)) {
             return response()->json(['error' => __('booking.invalid_whatsapp')], 422);
         }
-        if (!in_array($notificationType, ['booking', 'reminder'])) {
-            return response()->json(['error' => __('booking.invalid_notification_type')], 422);
-        }
-
-        // Format pesan notifikasi booking (dua bahasa)
-        $message = __("booking.notification_detail") . " : \n\n";
-        $message .= __("booking.notification_duration") . " : ";
-        if (!empty($bookingData['duration']) && $bookingData['duration'] === '2 Jam') {
-            $message .= __("booking.notification_2hour") . "\n";
-        } else {
-            $message .= __("booking.notification_1hour") . "\n";
-        }
-        $message .= __("booking.notification_date") . " : " . ($bookingData['date'] ?? '-') . "\n";
-        $message .= __("booking.notification_time") . " : ";
-        if (!empty($bookingData['hourEnd'])) {
-            $startHour = (int)($bookingData['hourStart'] ?? $bookingData['hour']);
-            $endHour = (int)$bookingData['hourEnd'];
-            $message .= sprintf("%02d:00 - %02d:00\n", $startHour, $startHour + 1);
-            $message .= sprintf("%02d:00 - %02d:00\n", $endHour, $endHour + 1);
-        } else {
-            $hour = $bookingData['hour'] ?? '-';
-            if (is_numeric($hour)) {
-                $message .= sprintf("%02d:00 - %02d:00\n", $hour, $hour + 1);
-            } else {
-                $message .= $hour . "\n";
-            }
-        }
-        $message .= __("booking.notification_name") . " : " . ($bookingData['name'] ?? '-') . "\n";
-        $message .= __("booking.notification_unit") . " : " . ($bookingData['unit'] ?? '-') . "\n";
-        $message .= __("booking.notification_whatsapp") . " : " . ($bookingData['whatsapp'] ?? '-') . "\n";
-
         // Kirim notifikasi WhatsApp via API eksternal
+        // Logging request data
+        \Log::info('WA Request', [
+            'url' => 'https://app.saungwa.com/api/create-message',
+            'payload' => [
+            'appkey' => config('services.saungwa.appkey'),
+            'authkey' => config('services.saungwa.authkey'),
+            'to' => $noWa,
+            'message' => $message,
+            'sandbox' => 'false'
+            ]
+        ]);
+
         $curl = curl_init();
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://app.saungwa.com/api/create-message',
@@ -330,15 +353,123 @@ class BookingController extends Controller
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => array(
-                'appkey' => env('SAUNGWA_APPKEY'),
-                'authkey' => env('SAUNGWA_AUTHKEY'),
-                'to' => $noWa,
-                'message' => $message,
-                'sandbox' => 'false'
+            'appkey' => config('services.saungwa.appkey'),
+            'authkey' => config('services.saungwa.authkey'),
+            'to' => $noWa,
+            'message' => $message,
+            'sandbox' => 'false'
             ),
         ));
         $response = curl_exec($curl);
+
+        // Logging response data
+        \Log::info('WA Response', [
+            'response' => $response,
+            'curl_error' => curl_error($curl),
+            'curl_info' => curl_getinfo($curl)
+        ]);
         curl_close($curl);
+        $status = 'failed';
+        if ($response) {
+            $decoded = json_decode($response, true);
+            if (is_array($decoded) && isset($decoded['status']) && ($decoded['status'] == 200 || $decoded['status'] === true)) {
+            $status = 'sent';
+            }
+        }
+        SendNotif::where('id', $id)->update([
+            'status' => $status,
+            'updated_at' => now(),
+        ]);
         return response()->json(['success' => true, 'message' => __('booking.notification_sent'), 'api_response' => $response]);
+    }
+
+    private function formatBookingMessage($bookingData)
+    {
+        $unit = $bookingData['unit'] ?? '-';
+        $date = $bookingData['date'] ?? '-';
+
+        // Jam booking
+        if (!empty($bookingData['hourEnd'])) {
+            $startHour = (int)($bookingData['hourStart'] ?? $bookingData['hour']);
+            $endHour = (int)$bookingData['hourEnd'];
+            $jam = sprintf("%02d:00 - %02d:00", $startHour, $endHour + 1);
+        } else {
+            $hour = $bookingData['hour'] ?? '-';
+            if (is_numeric($hour)) {
+                $jam = sprintf("%02d:00 - %02d:00", $hour, $hour + 1);
+            } else {
+                $jam = $hour . " - " . $hour;
+            }
+        }
+
+        $court = $bookingData['court'] ?? '';
+
+        // Gunakan helper __() dengan parameter
+        $message = __("booking.wa_greeting", ['unit' => $unit]) . "\n";
+        $message .= __("booking.wa_thanks") . "\n";
+        $message .= __("booking.wa_court", ['court' => $court]) . "Tennis\n";
+        $message .= __("booking.wa_date", ['date' => $date]) . "\n";
+        $message .= __("booking.wa_time", ['time' => $jam]) . "\n\n";
+        $message .= __("booking.wa_footer");
+
+        return $message;
+    }
+
+    private function formatCancelMessage($bookingData)
+    {
+        $unit = $bookingData['unit'] ?? '-';
+        $date = $bookingData['date'] ?? '-';
+
+        // Jam booking
+        if (!empty($bookingData['hourEnd'])) {
+            $startHour = (int)($bookingData['hourStart'] ?? $bookingData['hour']);
+            $endHour = (int)$bookingData['hourEnd'];
+            $jam = sprintf("%02d:00 - %02d:00", $startHour, $endHour + 1);
+        } else {
+            $hour = $bookingData['hour'] ?? '-';
+            if (is_numeric($hour)) {
+                $jam = sprintf("%02d:00 - %02d:00", $hour, $hour + 1);
+            } else {
+                $jam = $hour . " - " . $hour;
+            }
+        }
+
+        $message = __("booking.wa_cancel_greeting", ['unit' => $unit]) . "\n";
+        $message .= __("booking.wa_cancel_info") . "\n";
+        $message .= "📅 " . $date . "\n";
+        $message .= "⏰ " . $jam . "\n";
+        $message .= __("booking.wa_cancel_status") . "\n\n";
+        $message .= __("booking.wa_cancel_instruction") . "\n\n";
+        $message .= __("booking.wa_cancel_footer");
+
+        return $message;
+    }
+    private function formatReminderMessage($bookingData)
+    {
+        $unit = $bookingData['unit'] ?? '-';
+        $date = $bookingData['date'] ?? '-';
+
+        // Jam booking
+        if (!empty($bookingData['hourEnd'])) {
+            $startHour = (int)($bookingData['hourStart'] ?? $bookingData['hour']);
+            $endHour = (int)$bookingData['hourEnd'];
+            $jam = sprintf("%02d:00 - %02d:00", $startHour, $endHour + 1);
+        } else {
+            $hour = $bookingData['hour'] ?? '-';
+            if (is_numeric($hour)) {
+                $jam = sprintf("%02d:00 - %02d:00", $hour, $hour + 1);
+            } else {
+                $jam = $hour . " - " . $hour;
+            }
+        }
+
+        $message = __("booking.wa_reminder_greeting", ['unit' => $unit]) . "\n";
+        $message .= __("booking.wa_reminder_info") . "\n";
+        $message .= __("booking.wa_reminder_date", ['date' => $date]) . "\n";
+        $message .= __("booking.wa_reminder_time", ['time' => $jam]) . "\n";
+        $message .= __("booking.wa_reminder_status") . "\n\n";
+        $message .= __("booking.wa_reminder_footer");
+
+        return $message;
     }
 }

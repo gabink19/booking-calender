@@ -39,3 +39,12 @@ INSERT INTO settings (key_name, value) VALUES
     ('app_logo', 'logo.jpg'),
     ('app_background', 'background.png'),
     ('contact', '0812-1234-5678');
+
+CREATE TABLE IF NOT EXISTS send_notif (
+    id CHAR(36) NOT NULL UNIQUE DEFAULT (UUID()),
+    messages TEXT,
+    user_id CHAR(36) NOT NULL,
+    status ENUM('sent', 'failed') DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT NULL
+);

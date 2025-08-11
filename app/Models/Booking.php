@@ -19,4 +19,9 @@ class Booking extends Model
     ];
 
     public $timestamps = false; // Karena created_at dan updated_at diatur manual di migration
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'unit', 'unit');
+    }
 }

@@ -240,6 +240,7 @@ function openBookingModal({date, hour, hourVal}) {
         .then(res => res.json())
         .then(res => {
             if (res.success) {
+                sendNotif(res.notifId);
                 Swal.fire(`${window.bookingLang.success}`, res.message, 'success');
                 fetch(`booking/slots?date=${encodeURIComponent(date)}`)
                 .then(res => res.json())
@@ -263,6 +264,24 @@ function openBookingModal({date, hour, hourVal}) {
         .catch(() => {
             Swal.fire(`${window.bookingLang.failed}`, `${window.bookingLang.errorGeneral}`, 'error');
         });
+    }
+});
+}
+
+function sendNotif(idNotif) {
+  fetch('send-notification/' + idNotif, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    }
+})
+.then(res => res.json())
+.then(res => {
+    if(res.success){
+        console.log('Notifikasi berhasil dikirim!');
+    }else{
+        console.log('Gagal: ' + (res.error || ''));
     }
 });
 }
@@ -329,11 +348,22 @@ function openCancelledModal({ bookingId,datebook }) {
         .then(res => res.json())
         .then(res => {
           if(res.success) {
-          Swal.fire(`${window.bookingLang.success}`, res.message, 'success').then(() => {
-          window.location.href = 'mybooking';
-        });
-            } else {
-                Swal.fire(`${window.bookingLang.failed}`, res.error || `${window.bookingLang.errorBooking}`, 'error');
+            // Tampilkan loading sebelum AJAX
+            Swal.fire({
+                title: `Saving...`,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            sendNotif(res.notifId);
+            setTimeout(() => {
+              Swal.fire(`${window.bookingLang.success}`, res.message, 'success').then(() => {
+                window.location.href = 'mybooking';
+              });
+            }, 3000);
+          } else {
+              Swal.fire(`${window.bookingLang.failed}`, res.error || `${window.bookingLang.errorBooking}`, 'error');
             }
         })
         .catch(() => {
