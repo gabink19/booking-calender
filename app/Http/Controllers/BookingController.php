@@ -134,7 +134,7 @@ class BookingController extends Controller
                 'messages' => $message,
                 'user_id' => $userId,
                 'created_at' => now(),
-                'updated_at' => null,
+                'updated_at' => now(),
             ]);
         }
 
