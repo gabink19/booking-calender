@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+@php app()->setLocale('en'); @endphp
 <html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
