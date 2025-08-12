@@ -34,7 +34,6 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::post('/booking/cancel/{id}', [BookingController::class, 'cancel'])->name('booking.cancel');
     Route::get('/booking/export', [BookingController::class, 'export'])->name('booking.export');
-    Route::get('/booking/slots', [BookingController::class, 'ajaxSlots'])->name('booking.slots');
     Route::get('/mybooking', [BookingController::class, 'history'])->name('mybooking');
     Route::get('/profil', [BookingController::class, 'profil'])->name('profil');
     Route::post('/update-password/{uuid}', [AuthController::class, 'changePass'])->name('update.password');
@@ -85,3 +84,5 @@ Route::get('lang/{locale}', function ($locale) {
 
 // Route notification
 Route::post('/send-notification/{id}', [BookingController::class, 'sendNotification'])->name('booking.sendNotification');
+Route::get('/booking-inframe', [BookingController::class, 'bookingInframePublic'])->name('booking.inframe.public');
+Route::get('/booking/slots', [BookingController::class, 'ajaxSlots'])->name('booking.slots');

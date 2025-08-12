@@ -13,6 +13,7 @@ use App\Notifications\BookingWhatsappNotification;
 use App\Events\BookingEvent;
 use App\Models\SendNotif;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 use function Psy\debug;
 
@@ -331,7 +332,7 @@ class BookingController extends Controller
         }
         // Kirim notifikasi WhatsApp via API eksternal
         // Logging request data
-        \Log::info('WA Request', [
+        Log::info('WA Request', [
             'url' => 'https://app.saungwa.com/api/create-message',
             'payload' => [
             'appkey' => config('services.saungwa.appkey'),
@@ -363,7 +364,7 @@ class BookingController extends Controller
         $response = curl_exec($curl);
 
         // Logging response data
-        \Log::info('WA Response', [
+        Log::info('WA Response', [
             'response' => $response,
             'curl_error' => curl_error($curl),
             'curl_info' => curl_getinfo($curl)
@@ -471,5 +472,15 @@ class BookingController extends Controller
         $message .= __("booking.wa_reminder_footer");
 
         return $message;
+    }
+    
+    public function bookingInframePublic(Request $request)
+    {
+        session(['locale' => 'en']);
+        $dates = $this->getWeekDates();
+        $selectedDate = $request->input('date', $dates[0]);
+        $slots = $this->getSlots();
+
+        return view('booking-inframe-public', compact('dates', 'selectedDate', 'slots'));
     }
 }
