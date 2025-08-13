@@ -55,6 +55,19 @@
       <button type="submit" class="btn-login">{{ __('auth.login_btn') }}</button>
     </form>
   </div>
+      <div class="whatsapp-float" onclick="openWhatsApp()" role="button" aria-label="Chat via WhatsApp">
+        <img src="{{ asset('images/waicon.png') }}" alt="WhatsApp icon" />
+      </div>
+
+      <script>
+        function openWhatsApp() {
+          // Use international format if available, e.g., 62818xxxxxxx
+          var phoneNumber = "62{{ preg_replace('/[^0-9]/', '', $settings['contact'] ?? '81212345678') }}";
+          var message = "Hello, I'd like to ask about your services.";
+          var url = "https://api.whatsapp.com/send?phone=" + phoneNumber + "&text=" + encodeURIComponent(message);
+          window.open(url, "_blank");
+        }
+      </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     // Refresh captcha

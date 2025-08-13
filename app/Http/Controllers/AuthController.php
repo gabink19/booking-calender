@@ -6,12 +6,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Setting;
 
 class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('login');
+        $settings = Setting::all();
+        $settArr = [];
+        foreach ($settings as $setting) {
+            $settArr[$setting->key_name] = $setting->value;
+        }
+        $settings = $settArr;
+        return view('login', compact('settings'));
     }
 
     public function showLoginAdminForm()

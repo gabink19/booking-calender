@@ -449,19 +449,11 @@ class BookingController extends Controller
     {
         $unit = $bookingData['unit'] ?? '-';
         $date = $bookingData['date'] ?? '-';
-
-        // Jam booking
-        if (!empty($bookingData['hourEnd'])) {
-            $startHour = (int)($bookingData['hourStart'] ?? $bookingData['hour']);
-            $endHour = (int)$bookingData['hourEnd'];
-            $jam = sprintf("%02d:00 - %02d:00", $startHour, $endHour + 1);
+        $hour = $bookingData['hour'] ?? '-';
+        if (is_numeric($hour)) {
+            $jam = sprintf("%02d:00 - %02d:00", $hour, $hour + 1);
         } else {
-            $hour = $bookingData['hour'] ?? '-';
-            if (is_numeric($hour)) {
-                $jam = sprintf("%02d:00 - %02d:00", $hour, $hour + 1);
-            } else {
-                $jam = $hour . " - " . $hour;
-            }
+            $jam = $hour . " - " . $hour;
         }
 
         $message = __("booking.wa_reminder_greeting", ['unit' => $unit]) . "\n";
@@ -482,5 +474,41 @@ class BookingController extends Controller
         $slots = $this->getSlots();
 
         return view('booking-inframe-public', compact('dates', 'selectedDate', 'slots'));
+    }
+
+    public function sendReminderMessage(Request $request, $auth)
+    {
+        if ($auth != config('services.saungwa.authkey')) {
+            return response()->json(['error' => 'unauthorized'], 401);
+        }
+        $date = Carbon::today()->toDateString();
+        $hour = Carbon::now()->format('H');
+        // Ambil semua booking pada tanggal tsb (jam & unit)
+        $booked = Booking::where('date', $date)
+            ->where('hour', '=', $hour+1)
+            ->where('status', 'active')
+            ->join('users', 'bookings.unit', '=', 'users.unit')
+            ->get(['bookings.date','bookings.hour', 'bookings.unit', 'users.name', 'users.whatsapp']);
+        foreach ($booked as $booking) {
+            $bookingData = [
+                'date' => Carbon::parse($booking->date)->locale(app()->getLocale())->translatedFormat('l d F Y'),
+                'hour' => $booking->hour,
+                'name' => $booking->name,
+                'unit' => $booking->unit,
+                'whatsapp' => $booking->whatsapp
+            ];
+            $notifId = (string) Str::uuid();
+            $message = $this->formatReminderMessage($bookingData);
+            // Insert ke send_notif
+            SendNotif::create([
+                'id' => $notifId,
+                'messages' => $message,
+                'user_id' => $booking->user->uuid,
+                'created_at' => now(),
+                'updated_at' => null,
+            ]);
+            $this->sendNotification($request, $notifId);
+        }
+        return response()->json(['status' => 'success']);
     }
 }

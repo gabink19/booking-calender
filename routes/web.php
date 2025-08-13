@@ -86,3 +86,4 @@ Route::get('lang/{locale}', function ($locale) {
 Route::post('/send-notification/{id}', [BookingController::class, 'sendNotification'])->name('booking.sendNotification');
 Route::get('/booking-inframe', [BookingController::class, 'bookingInframePublic'])->name('booking.inframe.public');
 Route::get('/booking/slots', [BookingController::class, 'ajaxSlots'])->name('booking.slots');
+Route::get('/send-reminder/{auth}', [BookingController::class, 'sendReminderMessage'])->name('booking.sendReminder');
