@@ -256,7 +256,7 @@ class BookingController extends Controller
 
         $slots = [];
         $unit = session('unit');
-        for ($h = 6; $h < 21; $h++) {
+        for ($h = 6; $h < 20; $h++) {
             $isBooked = isset($bookedHours[$h]);
             $status = $isBooked ? __('booking.status_booked') : __('booking.status_available');
             $unitsBooked = '';
