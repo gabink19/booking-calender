@@ -138,7 +138,7 @@
             "columnDefs": [
                 { "orderable": false, "searchable": false, "targets": 0 }
             ],
-            "order": [[1, 'desc']],
+            // "order": [[1, 'desc']],
             "dom": 'Bfrtip',
             "buttons": [
                 {
