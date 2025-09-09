@@ -19,6 +19,7 @@
                     <th>{{ __('booking_admin.name') }}</th>
                     <th>{{ __('booking_admin.unit') }}</th>
                     <th>{{ __('booking_admin.status') }}</th>
+                    <th>{{ __('booking_admin.updated_at') }}</th>
                     <th>{{ __('booking_admin.action') }}</th>
                 </tr>
             </thead>
@@ -51,6 +52,7 @@
                                     <span class="label label-default">{{ ucfirst($booking->status) }}</span>
                                 @endif
                             </td>
+                            <td>{{ \Carbon\Carbon::parse($booking->updated_at)->format('d M Y H:i') }}</td>
                             <td>
                                 <div class="actions">
                                     @if($booking->status === 'active' && !$bookingDateTime->lt(now()))
@@ -143,13 +145,13 @@
                     extend: 'excelHtml5',
                     text: "{{ __('booking_admin.export_excel') }}",
                     className: 'action-btn primary',
-                    exportOptions: { columns: [1,2,3,4,5] }
+                    exportOptions: { columns: [1,2,3,4,5,6] }
                 },
                 {
                     extend: 'pdfHtml5',
                     text: "{{ __('booking_admin.export_pdf') }}",
                     className: 'action-btn primary',
-                    exportOptions: { columns: [1,2,3,4,5] },
+                    exportOptions: { columns: [1,2,3,4,5,6] },
                     customize: function (doc) {
                         doc.content[1].table.widths = Array(doc.content[1].table.body[0].length + 1).join('*').split('');
                     }
@@ -180,9 +182,13 @@
                         method: "POST",
                         data: { _token: "{{ csrf_token() }}" },
                         success: function(res) {
-                            Swal.fire('{{ __("booking_admin.success") }}', '{{ __("booking_admin.cancel_success") }}', 'success').then(() => {
-                                location.reload();
-                            });
+                            if (res.success) {
+                                Swal.fire('{{ __("booking_admin.success") }}', '{{ __("booking_admin.cancel_success") }}', 'success').then(() => {
+                                    location.reload();
+                                });
+                            }else{
+                                Swal.fire('{{ __("booking_admin.failed") }}', res.error, 'error');
+                            }
                         },
                         error: function() {
                             Swal.fire('{{ __("booking_admin.failed") }}', '{{ __("booking_admin.cancel_failed") }}', 'error');

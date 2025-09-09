@@ -8,6 +8,7 @@ return [
     'name' => 'Nama',
     'unit' => 'No. Unit',
     'status' => 'Status',
+    'updated_at' => 'Diperbarui Pada',
     'action' => 'Aksi',
     'maintenance' => 'Pemeliharaan',
     'active' => 'Aktif',

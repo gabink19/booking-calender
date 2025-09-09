@@ -26,7 +26,10 @@ class BookingController extends Controller
         $selectedDate = $request->input('date', $dates[0]);
         $slots = $this->getSlots();
         $userId = session('user_id');
-        $user = User::select('name', 'unit', 'whatsapp', 'is_admin')->where('uuid', $userId)->first();
+        $user = User::select('name', 'unit', 'whatsapp', 'is_admin')
+            ->where('uuid', $userId)
+            ->orderBy('updated_at', 'desc')
+            ->first();
         // Simpan data ke localStorage via JavaScript
         echo "<script>
             localStorage.setItem('user', JSON.stringify({

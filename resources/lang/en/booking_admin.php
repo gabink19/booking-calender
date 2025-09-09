@@ -8,6 +8,7 @@ return [
     'name' => 'Name',
     'unit' => 'Unit No.',
     'status' => 'Status',
+    'updated_at' => 'Updated At',
     'action' => 'Action',
     'maintenance' => 'Maintenance',
     'active' => 'Active',
