@@ -56,8 +56,9 @@ class AdminController extends Controller
         $bookings = \App\Models\Booking::select('bookings.*', 'users.name', 'users.is_admin')
             ->leftJoin('users', 'bookings.unit', '=', 'users.unit')
             ->distinct()
-            ->orderBy('date', 'desc')
-            ->orderBy('hour', 'desc')
+            ->orderBy('updated_at', 'desc')
+            // ->orderBy('date', 'desc')
+            // ->orderBy('hour', 'desc')
             ->get();
 
         return view('admin.booking',compact('bookings'));
