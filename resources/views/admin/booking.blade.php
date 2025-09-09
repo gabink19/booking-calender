@@ -136,7 +136,13 @@
                 "zeroRecords": "{{ __('booking_admin.zero_records') }}",
             },
             "columnDefs": [
-                { "orderable": false, "searchable": false, "targets": 0 }
+                { "orderable": true, "searchable": false, "targets": 0 },
+                { "orderable": false, "targets": 2 },
+                { "orderable": false, "targets": 3 },
+                { "orderable": false, "targets": 4 },
+                { "orderable": false, "targets": 5 },
+                { "orderable": false, "targets": 6 },
+                { "orderable": false, "searchable": false, "targets": 7 },
             ],
             // "order": [[1, 'desc']],
             "dom": 'Bfrtip',
