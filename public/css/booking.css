@@ -277,6 +277,7 @@ body {
   transition: color 0.18s;
   cursor: pointer;
   padding: 0 2px;
+  width: 30%;
 }
 .nav-btn.active,
 .nav-btn:active {
