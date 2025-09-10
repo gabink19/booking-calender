@@ -373,17 +373,18 @@ class BookingController extends Controller
         ]);
         curl_close($curl);
         $status = 'failed';
+        $decoded='';
         if ($response) {
             $decoded = json_decode($response, true);
-            if (is_array($decoded) && isset($decoded['status']) && ($decoded['status'] == 200 || $decoded['status'] === true)) {
-            $status = 'sent';
+            if (is_array($decoded) && isset($decoded['data']['status_code']) && ($decoded['data']['status_code']== '200')) {
+                $status = 'sent';
             }
         }
         SendNotif::where('id', $id)->update([
             'status' => $status,
             'updated_at' => now(),
         ]);
-        return response()->json(['success' => true, 'message' => __('booking.notification_sent'), 'api_response' => $response]);
+        return response()->json(['success' => true, 'message' => __('booking.notification_sent'), 'api_response' => $decoded]);
     }
 
     private function formatBookingMessage($bookingData)

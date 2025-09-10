@@ -67,6 +67,7 @@ Route::middleware('auth.session.admin')->group(function () {
     Route::post('/admin/settings/background', [AdminController::class, 'updateBackground'])->name('admin.settings.background');
     Route::post('/admin/settings/info', [AdminController::class, 'updateInfo'])->name('admin.settings.info');
 
+    Route::get('/admin/logNotif', [AdminController::class, 'logIndex'])->name('admin.logNotif.index');
     Route::get('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 });
 

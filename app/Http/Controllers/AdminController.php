@@ -145,4 +145,13 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Informasi aplikasi berhasil diubah!');
     }
+    
+    public function logIndex()
+    {
+        $logs = \App\Models\SendNotif::select('send_notif.*', 'users.name', 'users.unit')
+            ->leftJoin('users', 'send_notif.user_id', '=', 'users.uuid')
+            ->orderBy('send_notif.created_at', 'desc')
+            ->get();
+        return view('admin.log-notif', compact('logs'));
+    }
 }

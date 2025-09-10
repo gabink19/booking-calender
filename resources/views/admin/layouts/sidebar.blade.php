@@ -19,6 +19,9 @@
         <a href="{{ route('admin.settings') }}">
             <li class="{{ request()->is('admin/settings*') ? 'active' : '' }}">Settings</li>
         </a>
+        <a href="{{ route('admin.logNotif.index') }}">
+            <li class="{{ request()->is('admin/logNotif*') ? 'active' : '' }}">Log Notification</li>
+        </a>
         <a href="{{ route('admin.logout') }}">
             <li>Logout</li>
         </a>
