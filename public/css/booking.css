@@ -14,23 +14,52 @@ body {
   /* background: #fff; */
   padding: 30px 28px 10px 28px; /* Padding atas, kiri, kanan */
 }
+/* Header card */
 .header {
-  background: linear-gradient(90deg, #5c7cff 60%, #91e0fd 100%);
+  background: linear-gradient(90deg, #4B8DDD 0%, #90e0ff 100%);
   color: #fff;
-  border-radius: 12px;
-  padding: 20px 10px 16px 10px;
+  border-radius: 16px;
+  padding: 18px 16px;
   text-align: center;
-  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(79,140,255,0.08);
+  margin-bottom: 20px;
 }
 .header h1 {
-  margin: 0 0 4px 0;
-  font-size: 1.55rem;
-  font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0px;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
 }
 .header p {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  margin-top: 0px;
 }
+.header .contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 8px;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+.header .wa-link {
+  color: #fff;
+  background: #30c080;
+  border-radius: 6px;
+  padding: 5px 8px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 3px;
+  transition: background 0.2s;
+}
+.header .wa-link:hover {
+  background: #25d366;
+}
+
 .contact {
   display: flex;
   align-items: center;
@@ -60,75 +89,109 @@ body {
 .section {
   margin-bottom: 16px;
 }
+/* Tanggal horizontal scroll */
+
 .label-tanggal {
-  font-size: 1.18rem;
-  font-weight: bold;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #000018;
+  margin-bottom: 6px;
+  margin-top: 4px;
+  display: block;
+}
+.section {
+  margin-bottom: 17px;
 }
 .tanggal-list {
   display: flex;
-  gap: 8px;
-  margin-top: 7px;
-  margin-bottom: 2px;
-  flex-wrap: wrap;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
 }
 .tanggal-btn {
+  background: #b0f3d0;
   border: none;
-  background: #E6F4EF;
-  color: #233;
-  border-radius: 8px;
-  padding: 6px 10px 5px 10px;
-  font-size: 1rem;
-  font-weight: 500;
-  min-width: 58px;
-  cursor: pointer;
-  transition: background 0.15s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  outline: none;
-}
-.tanggal-btn.selected,
-.tanggal-btn:active {
-  background: #183C34;
-  color: #fff;
-}
-.tanggal-btn span {
-  font-size: 0.95em;
-  margin-top: 2px;
-}
-.label-slot {
-  margin-bottom: 10px;
-  font-size: 1.12rem;
-}
-.slot-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-.slot {
-  background: #E6FDF1;
-  border: none;
-  border-radius: 10px;
-  padding: 22px 4px 13px 4px;
-  font-size: 1.1rem;
-  color: #183C34;
-  box-shadow: 0 2px 4px #0001;
+  border-radius: 12px;
+  color: #21354b;;
+  font-weight: 600;
+  font-size: 1.01rem;
+  padding: 10px 14px;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+  min-width: 92px;
   text-align: center;
   cursor: pointer;
-  transition: background 0.13s;
-  font-weight: 500;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.tanggal-btn.selected,
+.tanggal-btn:active,
+.tanggal-btn:hover {
+  background: #4B8DDD;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(79,140,255,0.19);
+}
+
+.tanggal-btn span {
+  font-size: 0.96em;
+  color: #21354b;
+  opacity: 0.8;
+}
+/* Label slot */
+.label-slot {
+  font-size: 1.03rem;
+  font-weight: 600;
+  /* color: #2563a6; */
+  margin-bottom: 13px;
+}
+
+/* Slot grid */
+.slot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 13px;
+  margin-bottom: 8px;
+}
+.slot {
+  background: #b0f3d0;
+  border: 2px solid #eaf4fd;
+  border-radius: 13px;
+  color: #21354b;
+  font-size: 1.06rem;
+  font-weight: 600;
+  padding: 16px 0 10px 0;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.03);
+  cursor: pointer;
+  transition: border 0.18s, box-shadow 0.18s, background 0.18s, color 0.18s;
+  text-align: center;
+  outline: none;
   position: relative;
 }
+.slot[disabled] {
+  cursor: not-allowed;
+  /* opacity: 0.65; */
+}
+.slot-booked {
+  background: #ffeaea;
+  color: #d94141;
+  border-color: #ff6565;
+}
+.slot-past {
+  background: #ededed;
+  color: #909090;
+  border-color: #ededed;
+}
+.slot.selected, .slot:active, .slot:hover {
+  border-color: #4bdd83;
+  box-shadow: 0 0 0 4px #a3eaff40;
+}
+
+/* Slot label bawah */
 .slot span {
   display: block;
-  font-size: 1em;
-  margin-top: 2px;
-  color: #326d46;
-  font-weight: 400;
-}
-.slot.selected {
-  background: #183C34;
-  color: #fff;
+  font-size: 0.97em;
+  font-weight: 500;
+  margin-top: 6px;
+  opacity: 0.85;
 }
 .notif {
   display: flex;
@@ -205,17 +268,15 @@ body {
   background: none;
   border: none;
   outline: none;
-  flex: 1 1 0;
-  padding: 0 0 2px 0;
+  font-size: 1.02rem;
+  color: #76a9fa;
+  font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: linear-gradient(90deg, #5c7cff 60%, #91e0fd 100%);
-  font-size: 0.93em;
+  transition: color 0.18s;
   cursor: pointer;
-  transition: color 0.15s;
-  height: 100%;
-  justify-content: center;
+  padding: 0 2px;
 }
 .nav-btn.active,
 .nav-btn:active {
