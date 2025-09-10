@@ -100,7 +100,7 @@
         {{ __('profil.change_password') }}
       </button>
     </div>
-    <form method="POST" action="{{ route('logout') }}" style="text-align:center;margin-bottom:32px;">
+    <form method="POST" action="{{ route('logout.post') }}" style="text-align:center;margin-bottom:32px;">
       @csrf
       <button type="submit" style="background:#e53e3e;color:#fff;padding:10px 28px;border:none;border-radius:6px;font-size:16px;font-weight:500;cursor:pointer;box-shadow:0 1px 4px #0001;transition:background 0.2s;">
         {{ __('profil.logout') }}

@@ -20,7 +20,7 @@ use Mews\Captcha\Captcha;
 // Route login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout.post');
 
 // Route register
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
