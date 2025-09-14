@@ -222,14 +222,24 @@ class BookingController extends Controller
      */
     public function getWeekDates()
     {
-        $mulai = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $now = Carbon::now();
+        $isSunday = $now->dayOfWeek === Carbon::SUNDAY;
+        $isAfter21 = $now->hour >= 21;
+
+        // Jika hari Minggu dan jam >= 21:00, mulai minggu depan
+        if ($isSunday && $isAfter21) {
+            $mulai = $now->copy()->addWeek()->startOfWeek(Carbon::MONDAY);
+        } else {
+            $mulai = $now->startOfWeek(Carbon::MONDAY);
+        }
+
         $tanggal = [];
-        $locale = app()->getLocale(); // ambil locale dari aplikasi
+        $locale = app()->getLocale();
         for ($i = 0; $i < 7; $i++) {
             $carbon = $mulai->copy()->addDays($i)->locale($locale);
             $tanggal[] = [
                 'tanggal' => $carbon->toDateString(),
-                'hari' => $carbon->translatedFormat('l'), // Nama hari sesuai bahasa
+                'hari' => $carbon->translatedFormat('l'),
             ];
         }
         return $tanggal;
@@ -243,6 +253,26 @@ class BookingController extends Controller
      */
     public function getSlots($selectedDate = null)
     {
+        $now = Carbon::now();
+        $isSunday = $now->dayOfWeek === Carbon::SUNDAY;
+        $isAfter21 = $now->hour >= 21;
+
+        // Jika hari Minggu dan jam >= 21:00, mulai minggu depan
+        if ($isSunday && $isAfter21) {
+            // Jika $selectedDate belum diisi, ambil Senin minggu depan
+            if (!$selectedDate) {
+                $selectedDate = $now->copy()->addWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+            } else {
+                // Jika $selectedDate masih di minggu ini, ubah ke minggu depan
+                $selectedCarbon = Carbon::parse($selectedDate);
+                $startNextWeek = $now->copy()->addWeek()->startOfWeek(Carbon::MONDAY);
+                $endNextWeek = $startNextWeek->copy()->addDays(6);
+                if ($selectedCarbon->between($now->startOfWeek(Carbon::MONDAY), $now->endOfWeek(Carbon::SUNDAY))) {
+                    $selectedDate = $startNextWeek->toDateString();
+                }
+            }
+        }
+
         $date = $selectedDate ? Carbon::parse($selectedDate)->format('Y-m-d') : Carbon::today()->toDateString();
 
         // Ambil semua booking pada tanggal tsb (jam & unit)
