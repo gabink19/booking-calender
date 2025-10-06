@@ -520,6 +520,7 @@ class BookingController extends Controller
         $booked = Booking::where('date', $date)
             ->where('hour', '=', $hour+1)
             ->where('status', 'active')
+            ->where('is_admin', 0)
             ->join('users', 'bookings.unit', '=', 'users.unit')
             ->get(['bookings.date','bookings.hour', 'bookings.unit', 'users.name', 'users.whatsapp']);
         foreach ($booked as $booking) {
