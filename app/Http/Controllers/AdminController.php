@@ -154,4 +154,61 @@ class AdminController extends Controller
             ->get();
         return view('admin.log-notif', compact('logs'));
     }
+    public function addMaintenance(Request $request)
+    {
+        try {
+            $request->validate([
+                'date' => 'required|date|after:today'
+            ]);
+
+            $date = $request->input('date');
+            
+            // Pengecekan: ambil semua data booking di tanggal tersebut
+            $existingBookings = \App\Models\Booking::where('date', $date)->where('status', 'active')->get();
+            
+            // Jika sudah ada booking di tanggal tersebut
+            if ($existingBookings->count() > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tanggal ' . $date . ' sudah memiliki booking. Pilih tanggal lain untuk maintenance atau lakukan pembatalan terlebih dahulu pada tanggal tersebut.'
+                ], 400);
+            }
+
+            // Array jam maintenance (6-20)
+            $maintenanceHours = range(6, 20);
+            $maintenanceUnit = '0000 (TWR-I)';
+            
+            // Siapkan data untuk batch insert
+            $maintenanceData = [];
+            foreach ($maintenanceHours as $hour) {
+                $maintenanceData[] = [
+                    'date' => $date,
+                    'hour' => $hour,
+                    'unit' => $maintenanceUnit,
+                    'status' => 'active',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+
+            // Insert semua data maintenance sekaligus
+            DB::table('bookings')->insert($maintenanceData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Jadwal maintenance berhasil dibuat untuk tanggal ' . $date . ' (jam 6-20).'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal: ' . implode(', ', $e->validator->errors()->all())
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

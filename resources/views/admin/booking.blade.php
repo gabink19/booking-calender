@@ -205,19 +205,116 @@
         });
 
         // Modal SweetAlert2 untuk tambah booking
+        // $('#btn-tambah-booking').on('click', function(e) {
+        //     e.preventDefault();
+        //     Swal.fire({
+        //         title: '{{ __("booking_admin.schedule_maintenance") }}',
+        //         html:
+        //             `<div style="overflow:auto;max-height:430px;">
+        //                 <iframe src="{{ route('admin.booking.inframe') }}" width="100%" height="400" frameborder="0" style="display:block;border:0;"></iframe>
+        //             </div>`,
+        //         customClass: { popup: 'swal2-modal-custom-height' },
+        //         focusConfirm: false,
+        //         showCancelButton: false,
+        //         showConfirmButton: false,
+        //         didClose: () => { location.reload(); }
+        //     });
+        // });
         $('#btn-tambah-booking').on('click', function(e) {
             e.preventDefault();
+
+            // Get today's date for minimum date validation
+            var today = new Date();
+            today.setDate(today.getDate() + 1);
+            today = today.toISOString().split('T')[0];
+
             Swal.fire({
-                title: '{{ __("booking_admin.schedule_maintenance") }}',
-                html:
-                    `<div style="overflow:auto;max-height:430px;">
-                        <iframe src="{{ route('admin.booking.inframe') }}" width="100%" height="400" frameborder="0" style="display:block;border:0;"></iframe>
-                    </div>`,
-                customClass: { popup: 'swal2-modal-custom-height' },
-                focusConfirm: false,
-                showCancelButton: false,
-                showConfirmButton: false,
-                didClose: () => { location.reload(); }
+            title: '{{ __("booking_admin.schedule_maintenance") }}',
+            html: `
+                <div style="text-align: center; margin: 20px 0;">
+                <label class="swal2-label" for="maintenance-date">Pilih Tanggal Pemeliharaan:</label>
+                <input type="date" id="maintenance-date" class="swal2-input" min="${today}" required><br>
+                <small style="color: #6b7280; font-size: 12px;">Tgl harus lebih besar dari hari ini.</small>
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: '{{ __("booking_admin.cancel") }}',
+            preConfirm: () => {
+                const date = document.getElementById('maintenance-date').value;
+                if (!date) {
+                Swal.showValidationMessage('Pilih Tanggal Pemeliharaan');
+                return false;
+                }
+
+                // Validate date is not in the past
+                const selectedDate = new Date(date);
+                const todayDate = new Date();
+                todayDate.setHours(0, 0, 0, 0);
+
+                if (selectedDate < todayDate) {
+                Swal.showValidationMessage('Tgl pemeliharaan harus lebih besar dari hari ini');
+                return false;
+                }
+
+                return { date: date };
+            }
+            }).then((result) => {
+                if (result.isConfirmed && result.value && result.value.date) {
+                    // Show loading
+                    Swal.fire({
+                    title: 'Sedang memproses...',
+                    text: 'Silakan tunggu...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                    });
+
+                    // Send AJAX request
+                    $.ajax({
+                    url: "{{ route('admin.booking.maintenance') }}",
+                    method: "POST",
+                    data: {
+                        date: result.value.date,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                        Swal.fire({
+                            title: 'Berhasil',
+                            text: response.message || 'Jadwal pemeliharaan berhasil dibuat.',
+                            icon: 'success'
+                        }).then(() => {
+                            location.reload();
+                        });
+                        } else {
+                        Swal.fire({
+                            title: 'Gagal',
+                            text: response.message || 'Jadwal pemeliharaan gagal dibuat.',
+                            icon: 'error'
+                        });
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Jadwal pemeliharaan gagal dibuat.';
+
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        errorMessage = Object.values(errors).flat().join('\n');
+                        }
+
+                        Swal.fire({
+                        title: 'Gagal',
+                        text: errorMessage,
+                        icon: 'error'
+                        });
+                    }
+                    });
+                }
             });
         });
     });
